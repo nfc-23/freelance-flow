@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(data) {
+      return isSignedIn() && data.userId == request.auth.uid;
+    }
+
+    function isOwnerFromResource() {
+      return isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Collections ---
+
+    // Clients
+    match /clients/{clientId} {
+      function isValidClient(data) {
+        return data.userId == request.auth.uid &&
+               data.name is string && data.name.size() > 0 && data.name.size() < 256 &&
+               data.email is string && data.email.size() > 0;
+      }
+      
+      allow get: if true; // Public access for portal/invoices
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidClient(incoming());
+      allow update: if isOwner(existing()) && isValidClient(incoming());
+      allow delete: if isOwner(existing());
+    }
+
+    // Projects
+    match /projects/{projectId} {
+      function isValidProject(data) {
+        return data.userId == request.auth.uid &&
+               data.title is string && data.title.size() > 0;
+      }
+
+      allow get: if true; // Public portal access
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidProject(incoming());
+      allow update: if isOwner(existing()) && isValidProject(incoming());
+      allow delete: if isOwner(existing());
+    }
+
+    // Tasks
+    match /tasks/{taskId} {
+      function isValidTask(data) {
+        return data.userId == request.auth.uid &&
+               data.projectId is string &&
+               data.title is string && data.title.size() > 0;
+      }
+
+      allow get: if true; // Public portal access
+      allow list: if (isSignedIn() && resource.data.userId == request.auth.uid) || (resource.data.projectId != null);
+      allow create: if isSignedIn() && isValidTask(incoming());
+      allow update: if isOwner(existing()) && isValidTask(incoming());
+      allow delete: if isOwner(existing());
+    }
+
+    // Invoices
+    match /invoices/{invoiceId} {
+      function isValidInvoice(data) {
+        return data.userId == request.auth.uid &&
+               data.invoiceNumber is string &&
+               data.amount is number;
+      }
+
+      allow get: if true; // Public access
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidInvoice(incoming());
+      allow update: if isOwner(existing()) && isValidInvoice(incoming());
+      allow delete: if isOwner(existing());
+    }
+
+    // Expenses
+    match /expenses/{expenseId} {
+      function isValidExpense(data) {
+        return data.userId == request.auth.uid &&
+               data.amount is number && data.amount > 0 &&
+               data.description is string && data.description.size() > 0;
+      }
+
+      allow get: if isOwner(existing());
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidExpense(incoming());
+      allow update: if isOwner(existing()) && isValidExpense(incoming());
+      allow delete: if isOwner(existing());
+    }
+
+    // Project Comments
+    match /project_comments/{commentId} {
+      function isValidComment(data) {
+        return data.projectId is string &&
+               data.text is string && data.text.size() > 0 &&
+               data.username is string;
+      }
+
+      // Portal access: allow read if we know the project exists? 
+      // For now, let's allow read by ID or if filtering by projectId
+      allow read: if (isSignedIn()) || (resource.data.projectId != null); 
+      allow create: if isSignedIn() || (incoming().projectId != null); // Allow portal guests to comment too? Use isSignedIn() if you only want registered users.
+      allow delete: if isSignedIn(); 
+    }
+  }
+}

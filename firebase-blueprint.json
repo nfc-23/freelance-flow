@@ -1,0 +1,139 @@
+{
+  "entities": {
+    "Client": {
+      "title": "Client",
+      "description": "Represents a client related to projects or business.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string", "description": "The UID of the freelancer who owns this data" },
+        "name": { "type": "string" },
+        "company": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name", "email"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A project managed by the freelancer.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "completed", "on-hold", "archived"] },
+        "budget": { "type": "number" },
+        "startDate": { "type": "string", "format": "date" },
+        "endDate": { "type": "string", "format": "date" },
+        "type": { "type": "string", "enum": ["client", "personal"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "status", "type"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "A task within a project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "title": { "type": "string" },
+        "completed": { "type": "boolean" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+        "dueDate": { "type": "string", "format": "date" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "projectId", "title", "completed"]
+    },
+    "Invoice": {
+      "title": "Invoice",
+      "description": "A billing document for a client project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "projectId": { "type": "string" },
+        "invoiceNumber": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "sent", "paid", "overdue"] },
+        "dueDate": { "type": "string", "format": "date" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": { "type": "string" },
+              "quantity": { "type": "number" },
+              "rate": { "type": "number" },
+              "amount": { "type": "number" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "clientId", "projectId", "invoiceNumber", "amount", "status"]
+    },
+    "Expense": {
+      "title": "Expense",
+      "description": "A cost associated with business or project.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "projectId": { "type": "string", "description": "Optional: link to project" },
+        "description": { "type": "string" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "description", "amount", "date"]
+    },
+    "ProjectComment": {
+      "title": "Project Comment",
+      "description": "Feedback or comments on a project, often from the portal.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "projectId": { "type": "string" },
+        "text": { "type": "string" },
+        "username": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "text", "username"]
+    }
+  },
+  "firestore": {
+    "clients": {
+      "schema": "Client",
+      "description": "List of business clients."
+    },
+    "projects": {
+      "schema": "Project",
+      "description": "List of projects."
+    },
+    "tasks": {
+      "schema": "Task",
+      "description": "Project tasks."
+    },
+    "invoices": {
+      "schema": "Invoice",
+      "description": "Billing records."
+    },
+    "expenses": {
+      "schema": "Expense",
+      "description": "Business expenses."
+    },
+    "project_comments": {
+      "schema": "ProjectComment",
+      "description": "Comments left on projects."
+    }
+  }
+}
