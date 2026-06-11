@@ -18,6 +18,7 @@ export function ProjectList() {
   const [newTitle, setNewTitle] = useState('');
   const [newBudget, setNewBudget] = useState('');
   const [newStatus, setNewStatus] = useState('planned');
+  const [newType, setNewType] = useState('client');
   const [clients, setClients] = useState<any[]>([]);
   const [selectedClient, setSelectedClient] = useState('');
   const [saving, setSaving] = useState(false);
@@ -38,6 +39,7 @@ export function ProjectList() {
     setNewTitle('');
     setNewBudget('');
     setNewStatus('untouched');
+    setNewType('client');
     setSelectedClient('');
     setIsModalOpen(true);
   };
@@ -48,6 +50,7 @@ export function ProjectList() {
     setNewTitle(project.title);
     setNewBudget(project.budget.toString());
     setNewStatus(project.status || 'untouched');
+    setNewType(project.type || 'client');
     setSelectedClient(project.clientId || '');
     setIsModalOpen(true);
   };
@@ -60,7 +63,8 @@ export function ProjectList() {
       setSaving(true);
       const projectData = {
         title: newTitle,
-        clientId: selectedClient || null,
+        type: newType,
+        clientId: newType === 'client' ? (selectedClient || null) : null,
         budget: Number(newBudget) || 0,
         status: editingProject ? newStatus : (newStatus || 'untouched'),
       };
@@ -70,8 +74,7 @@ export function ProjectList() {
       } else {
         await firestoreService.create('projects', {
           ...projectData,
-          createdAt: new Date().toISOString(),
-          type: 'client'
+          createdAt: new Date().toISOString()
         });
       }
 
@@ -200,12 +203,10 @@ export function ProjectList() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Associated Client</label>
-                    <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="w-full px-5 py-4 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-2xl font-bold focus:ring-2 focus:ring-brand-500/20 outline-none text-slate-800 dark:text-slate-200 text-sm">
-                      <option value="">-- Internal / Skunkworks --</option>
-                      {clients.map(c => (
-                        <option key={c.id} value={c.id}>{c.name} {c.company ? `(${c.company})` : ''}</option>
-                      ))}
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Project Type</label>
+                    <select value={newType} onChange={e => setNewType(e.target.value)} className="w-full px-5 py-4 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-2xl font-bold focus:ring-2 focus:ring-brand-500/20 outline-none text-slate-800 dark:text-slate-200 text-sm">
+                      <option value="client">Client Project</option>
+                      <option value="personal">Personal / Internal</option>
                     </select>
                   </div>
                   <div>
@@ -220,6 +221,18 @@ export function ProjectList() {
                     </select>
                   </div>
                 </div>
+
+                {newType === 'client' && (
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Associated Client</label>
+                    <select value={selectedClient} onChange={e => setSelectedClient(e.target.value)} className="w-full px-5 py-4 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-2xl font-bold focus:ring-2 focus:ring-brand-500/20 outline-none text-slate-800 dark:text-slate-200 text-sm">
+                      <option value="">-- Select Client --</option>
+                      {clients.map(c => (
+                        <option key={c.id} value={c.id}>{c.name} {c.company ? `(${c.company})` : ''}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Financial Cap Target</label>
@@ -283,7 +296,7 @@ export function ProjectList() {
                     {project.status || 'untouched'}
                   </span>
                   <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest bg-slate-50 dark:bg-dark-bg px-2.5 py-1 rounded-lg border border-slate-100 dark:border-white/5 truncate max-w-[120px]">
-                    {project.clientId ? clients.find(c => c.id === project.clientId)?.name || 'Client' : 'Internal'}
+                    {project.type === 'personal' ? 'Personal' : (project.clientId ? clients.find(c => c.id === project.clientId)?.name || 'Client' : 'Internal')}
                   </span>
                 </div>
                 <div>
@@ -345,7 +358,7 @@ function ProjectDetails({ project, onBack, clients }: { project: any, onBack: ()
   const [addingTask, setAddingTask] = useState(false);
   const [isAiSuggesting, setIsAiSuggesting] = useState(false);
 
-  const clientName = project.clientId ? clients.find(c => c.id === project.clientId)?.name : 'Internal / None';
+  const clientName = project.type === 'personal' ? 'Personal' : (project.clientId ? clients.find(c => c.id === project.clientId)?.name : 'Internal / None');
 
   const handleAiSuggestTasks = async () => {
     if (isAiSuggesting) return;

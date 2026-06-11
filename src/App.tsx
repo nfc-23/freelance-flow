@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { LandingPage } from './components/landing/LandingPage';
 import { cn } from './lib/utils';
 import { auth } from './services/firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
@@ -110,42 +111,7 @@ export default function App() {
   }
 
   if (!user) {
-    return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-white dark:bg-dark-bg p-6 font-sans">
-        <motion.div 
-          initial={{ scale: 0.8, opacity: 0, rotate: -10 }}
-          animate={{ scale: 1, opacity: 1, rotate: 0 }}
-          className="w-20 h-20 bg-brand-600 rounded-[2rem] flex items-center justify-center mb-8 shadow-2xl shadow-brand-500/40"
-        >
-          <Briefcase className="text-white w-10 h-10" />
-        </motion.div>
-        <motion.h1 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight"
-        >
-          FreelanceFlow
-        </motion.h1>
-        <motion.p 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-slate-500 dark:text-slate-400 mb-8 max-w-sm text-center font-medium leading-relaxed"
-        >
-          The ultimate intelligence dashboard for professional creators and independent teams.
-        </motion.p>
-        <motion.button 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          onClick={handleLogin}
-          className="bg-brand-600 hover:bg-brand-700 text-white px-10 py-4 rounded-2xl font-bold transition-all shadow-xl shadow-brand-500/25 flex items-center space-x-3 active:scale-95"
-        >
-          <span>Authenticate with Google</span>
-        </motion.button>
-      </div>
-    );
+    return <LandingPage />;
   }
 
   return (
