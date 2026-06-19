@@ -54,6 +54,7 @@ export default function App() {
   const [isDark, setIsDark] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Check for public views
   const urlParams = new URLSearchParams(window.location.search);
@@ -303,10 +304,81 @@ export default function App() {
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
 
-            <button className="p-2.5 bg-slate-100 dark:bg-dark-card text-slate-400 hover:text-brand-600 transition-all rounded-xl relative">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand-500 rounded-full border-2 border-white dark:border-dark-card"></span>
-            </button>
+            <div className="relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2.5 bg-slate-100 dark:bg-dark-card text-slate-400 hover:text-brand-600 transition-all rounded-xl relative"
+              >
+                <Bell className="w-4 h-4" />
+                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand-500 rounded-full border-2 border-white dark:border-dark-card"></span>
+              </button>
+
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-3 w-80 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-3xl shadow-xl overflow-hidden z-50 origin-top-right flex flex-col"
+                  >
+                    <div className="p-5 border-b border-slate-100 dark:border-dark-border flex justify-between items-center">
+                      <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">System Feed</h3>
+                      <button 
+                        onClick={() => setShowNotifications(false)}
+                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
+                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
+                        <div className="flex gap-4 items-start">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                            <Clock className="w-4 h-4 text-emerald-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">Daily sync report generated</p>
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">AI analysis on active projects complete. Velocity is nominal.</p>
+                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">12 MINS AGO</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
+                        <div className="flex gap-4 items-start">
+                          <div className="w-8 h-8 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
+                            <CreditCard className="w-4 h-4 text-brand-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-500 transition-colors">Invoice Paid</p>
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">Client just settled invoice INV-281 for $4,500.</p>
+                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">2 HOURS AGO</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
+                        <div className="flex gap-4 items-start">
+                          <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
+                            <Users className="w-4 h-4 text-indigo-500" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">New Portal Activity</p>
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">Acme Corp viewed the latest project update.</p>
+                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">5 HOURS AGO</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-dark-bg/50 text-center">
+                      <button className="text-[10px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-600 transition-colors">
+                        Mark all as read
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
             
             <button className="hidden sm:block p-2 text-slate-400 hover:text-brand-600 transition-all rounded-xl border border-slate-200 dark:border-dark-border">
                <Layers className="w-4 h-4" />
