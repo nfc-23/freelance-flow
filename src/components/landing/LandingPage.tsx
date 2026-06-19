@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
-import { 
-  Briefcase, ArrowRight, Zap, Target, PieChart as PieChartIcon, 
-  ShieldCheck, Code, Sparkles, ChevronRight, LayoutDashboard, 
-  CreditCard, Users, CheckCircle2, TrendingUp, Layers, 
-  Terminal, Rocket, Command, Activity, Cpu, Banknote
-} from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { motion } from 'motion/react';
+import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2 } from 'lucide-react';
 import { auth } from '../../services/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const yParallax = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,314 +25,179 @@ export function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#020817] text-slate-200 font-sans selection:bg-emerald-500 selection:text-white overflow-hidden">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-900/20 rounded-full blur-[120px]" />
-        <div className="absolute top-[40%] right-[-10%] w-[40%] h-[60%] bg-indigo-900/20 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] left-[20%] w-[60%] h-[50%] bg-teal-900/10 rounded-full blur-[100px]" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-      </div>
-
-      {/* Navigation */}
-      <nav className={cn(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300 pointer-events-none",
-        isScrolled ? "bg-[#020817]/80 backdrop-blur-2xl border-b border-white/5 py-4" : "py-6"
-      )}>
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between pointer-events-auto">
+    <div className="min-h-screen bg-bg text-txt-primary font-sans selection:bg-primary/20 selection:text-primary">
+      <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-surface/80 backdrop-blur-md border-b border-ui-border py-4' : 'py-6'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-2xl flex items-center justify-center text-slate-900 shadow-[0_0_20px_rgba(16,185,129,0.3)] rotate-3 transition-transform hover:rotate-6">
-               <Briefcase className="w-5 h-5 font-black" />
+            <div className="w-8 h-8 rounded border border-ui-border flex items-center justify-center text-primary bg-surface shadow-sm rotate-3">
+               <Layers className="w-4 h-4" />
             </div>
-            <span className="font-black text-2xl tracking-tight text-white uppercase">Flow.</span>
+            <span className="font-display font-bold text-xl text-txt-primary">Freelance Flow.</span>
           </div>
           
-          <button 
-            onClick={handleLogin}
-            className="group hidden sm:flex items-center gap-2 bg-white text-slate-900 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest transition-all hover:bg-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95"
-          >
+          <button onClick={handleLogin} className="btn-primary btn-md gap-2 hidden sm:flex">
             Access Console
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </nav>
 
-      <main className="relative z-10">
-        {/* Hero Section */}
-        <section className="pt-40 pb-20 md:pt-48 md:pb-32 px-6 md:px-12">
-          <div className="max-w-7xl mx-auto flex flex-col items-center text-center">
-             <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5 }}
-               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 font-bold text-[10px] uppercase tracking-widest border border-emerald-500/20 mb-8 backdrop-blur-sm"
-             >
-               <Sparkles className="w-3.5 h-3.5" />
-               <span>v2.0 Operating System</span>
-             </motion.div>
-             
-             <motion.h1 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5, delay: 0.1 }}
-               className="text-6xl md:text-8xl lg:text-[7rem] font-black tracking-tighter text-white leading-[0.95] mb-8"
-             >
-               ARCHITECT YOUR <br className="hidden md:block"/>
-               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 flex-col sm:flex-row to-teal-200">
-                 INDEPENDENCE.
-               </span>
-             </motion.h1>
-             
-             <motion.p 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5, delay: 0.2 }}
-               className="text-lg md:text-2xl text-slate-400 font-medium mb-12 leading-relaxed max-w-3xl"
-             >
-               A unified intelligence interface for elite professionals. Manage projects, track velocity, deploy invoices, and command your clientele from a single, deeply integrated platform.
-             </motion.p>
-             
-             <motion.div 
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ duration: 0.5, delay: 0.3 }}
-               className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto"
-             >
-               <button 
-                 onClick={handleLogin}
-                 className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] flex items-center justify-center gap-3 active:scale-95 group"
-               >
-                 Initialize Workspace
-                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-               </button>
-             </motion.div>
-          </div>
+      <main className="relative pt-32 lg:pt-48 pb-24">
+        {/* Decorative subtle dot grid */}
+        <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, rgba(99, 102, 241, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
 
-          {/* Abstract Dashboard Mockup */}
-          <motion.div 
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
-            style={{ y: yParallax }}
-            className="max-w-6xl mx-auto mt-24 relative"
-          >
-            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 to-transparent blur-3xl -z-10" />
-            <div className="rounded-[2.5rem] bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 p-4 md:p-6 shadow-2xl flex flex-col gap-6">
-              <div className="flex items-center gap-3 px-2">
-                 <div className="w-3 h-3 rounded-full bg-rose-500/80" />
-                 <div className="w-3 h-3 rounded-full bg-amber-500/80" />
-                 <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-                 <div className="ml-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/5 text-[9px] uppercase tracking-widest text-slate-400 font-bold hidden md:block">
-                   flow-os / dashboard / active-workloads
-                 </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                 {/* Sidebar Mock */}
-                 <div className="hidden md:flex flex-col gap-3 col-span-1">
-                   <div className="h-10 bg-white/5 rounded-xl border border-white/5" />
-                   <div className="h-10 bg-emerald-500/10 border border-emerald-500/20 rounded-xl" />
-                   <div className="h-10 bg-white/5 rounded-xl border border-white/5" />
-                   <div className="h-10 bg-white/5 rounded-xl border border-white/5" />
-                 </div>
-                 {/* Main Content Mock */}
-                 <div className="col-span-1 md:col-span-3 flex flex-col gap-4">
-                   <div className="flex gap-4">
-                      <div className="flex-1 h-32 bg-indigo-500/10 rounded-2xl border border-indigo-500/20 flex p-6 items-end">
-                        <div className="w-full h-1/2 bg-indigo-500/30 rounded-t-lg" />
-                      </div>
-                      <div className="flex-1 h-32 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 flex p-6 items-end">
-                         <div className="w-full h-3/4 bg-emerald-500/30 rounded-t-lg" />
-                      </div>
-                      <div className="flex-1 h-32 bg-amber-500/10 rounded-2xl border border-amber-500/20 hidden lg:flex p-6 items-end">
-                         <div className="w-full h-1/4 bg-amber-500/30 rounded-t-lg" />
-                      </div>
-                   </div>
-                   <div className="h-64 bg-white/5 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col p-6">
-                      <div className="w-1/4 h-6 bg-white/10 rounded-full mb-6" />
-                      <div className="flex-1 border-b border-white/5 flex items-end gap-2">
-                        {[40, 60, 30, 80, 50, 90, 70, 45, 65, 85].map((h, i) => (
-                          <div key={i} className="flex-1 bg-white/10 rounded-t-sm" style={{ height: `${h}%` }} />
-                        ))}
-                      </div>
-                   </div>
-                 </div>
-              </div>
-            </div>
-          </motion.div>
-        </section>
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center bg-surface border border-ui-border rounded-full px-4 py-1.5 mb-8 shadow-sm">
+             <span className="w-2 h-2 rounded-full bg-secondary mr-2" />
+             <span className="text-[13px] font-medium text-txt-secondary">DESIGN.md Ready</span>
+           </motion.div>
+           
+           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-7xl font-display text-txt-primary leading-[1.05] mb-6">
+             Architect your <span className="text-primary">independence.</span>
+           </motion.h1>
+           
+           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-lg md:text-xl text-txt-secondary max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
+             An editorial precision interface for elite professionals. Manage projects, track velocity, deploy invoices, and command your clientele.
+           </motion.p>
+           
+           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+             <button onClick={handleLogin} className="btn-primary btn-lg w-full sm:w-auto px-8 gap-2">
+               Initialize Workspace
+               <ArrowRight className="w-4 h-4" />
+             </button>
+             <button onClick={handleLogin} className="btn-secondary btn-lg w-full sm:w-auto px-8">
+               View Live Demo
+             </button>
+           </motion.div>
+        </div>
 
-        {/* Feature Deep Dive: Bento Grid */}
-        <section className="py-24 px-6 md:px-12 bg-white/5 border-y border-white/5 backdrop-blur-sm relative">
-           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent" />
-           <div className="max-w-7xl mx-auto">
-              <div className="text-center max-w-3xl mx-auto mb-20">
-                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-6 uppercase">Unified Intelligence Architecture</h2>
-                 <p className="text-xl text-slate-400 font-medium">Stop context-switching. Flow brings your projects, finances, and analytics into a single, high-performance tactical display.</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                {/* Large Bento Box */}
-                <div className="md:col-span-2 bg-[#0a0f1d] rounded-[2.5rem] border border-white/10 p-8 md:p-12 relative overflow-hidden group hover:border-emerald-500/30 transition-colors">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(16,185,129,0.1),transparent_50%)]" />
-                  <div className="relative z-10 flex flex-col h-full">
-                    <div className="w-14 h-14 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mb-6">
-                      <Activity className="w-6 h-6 text-emerald-400" />
-                    </div>
-                    <h3 className="text-3xl font-black text-white uppercase tracking-tight mb-4">Command Center Dashboard</h3>
-                    <p className="text-slate-400 text-lg leading-relaxed mb-8 flex-1">
-                      Instantly perceive the state of your business. Our central dashboard aggregates data across all active projects, visualizing task velocity, lifecycle distribution, and projected revenue through interactive, real-time telemetry.
-                    </p>
-                    <div className="pt-6 border-t border-white/10 flex gap-4">
-                      <div className="flex-1">
-                        <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Taxonomy</p>
-                        <p className="text-xl font-bold text-white">Workload Analytics</p>
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold mb-1">Velocity</p>
-                        <p className="text-xl font-bold text-white">Progress Tracking</p>
-                      </div>
-                    </div>
-                  </div>
+        {/* Abstract Component Showcase */}
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.8 }} className="max-w-6xl mx-auto mt-24 px-6 relative z-10">
+          <div className="genesis-card p-6 md:p-10 flex flex-col gap-8 shadow-xl shadow-black/5 bg-white/50 backdrop-blur-3xl border-white/50 ring-1 ring-black/5">
+             <div className="flex items-center gap-3 border-b border-ui-border pb-4">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
                 </div>
-
-                {/* Vertical Box */}
-                <div className="bg-[#0a0f1d] rounded-[2.5rem] border border-white/10 p-8 md:p-12 relative overflow-hidden group hover:border-indigo-500/30 transition-colors">
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.1),transparent_50%)]" />
-                  <div className="relative z-10 flex flex-col h-full">
-                    <div className="w-14 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center mb-6">
-                      <Cpu className="w-6 h-6 text-indigo-400" />
-                    </div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4">AI Heuristics</h3>
-                    <p className="text-slate-400 font-medium leading-relaxed mb-8">
-                       Continuous artificial intelligence actively monitors your workloads, predicting bottlenecks and analyzing burn rates before they become operational risks.
-                    </p>
-                    <div className="mt-auto h-32 bg-white/5 rounded-2xl border border-white/5 relative overflow-hidden flex flex-col gap-2 p-4 justify-center">
-                       <div className="h-2 w-3/4 bg-indigo-500/50 rounded-full" />
-                       <div className="h-2 w-1/2 bg-indigo-400/30 rounded-full" />
-                       <div className="h-2 w-5/6 bg-indigo-600/60 rounded-full" />
-                    </div>
-                  </div>
+                <div className="flex-1" />
+                <div className="bg-surface border border-ui-border px-3 py-1 rounded-md text-xs font-mono text-txt-secondary">
+                  ~/workspace/flow
                 </div>
-
-                {/* Horizontal Box */}
-                <div className="bg-[#0a0f1d] rounded-[2.5rem] border border-white/10 p-8 md:p-12 relative overflow-hidden group hover:border-amber-500/30 transition-colors">
-                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.1),transparent_50%)]" />
-                   <div className="relative z-10">
-                    <div className="w-14 h-14 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mb-6">
-                      <Banknote className="w-6 h-6 text-amber-400" />
-                    </div>
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4">Automated Ledgers</h3>
-                    <p className="text-slate-400 font-medium leading-relaxed mb-6 lg:w-2/3">
-                      Generate pristine, professional invoices directly from project milestones. Track outstanding balances, mark payments, and distribute secure public links to clients instantly.
-                    </p>
-                   </div>
-                </div>
-
-                <div className="md:col-span-2 bg-[#0a0f1d] rounded-[2.5rem] border border-white/10 p-8 md:p-12 relative overflow-hidden group hover:border-teal-500/30 transition-colors">
-                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_left,rgba(20,184,166,0.1),transparent_50%)]" />
-                   <div className="relative z-10 flex flex-col md:flex-row items-center gap-8">
-                      <div className="md:w-1/2">
-                        <div className="w-14 h-14 bg-teal-500/10 border border-teal-500/20 rounded-2xl flex items-center justify-center mb-6">
-                          <Layers className="w-6 h-6 text-teal-400" />
-                        </div>
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tight mb-4">Project Structuring</h3>
-                        <p className="text-slate-400 font-medium leading-relaxed">
-                          Break massive endeavors into manageable tasks. Assign budgets, structure hourly rates, and categorize via an intuitive drag-and-drop hierarchy designed for speed.
-                        </p>
-                      </div>
-                      <div className="md:w-1/2 w-full flex flex-col gap-3">
-                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-full border-2 border-teal-500/50 flex items-center justify-center"><CheckCircle2 className="w-4 h-4 text-teal-400" /></div>
-                            <div className="h-3 w-1/2 bg-white/20 rounded-full" />
-                         </div>
-                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4 opacity-70">
-                            <div className="w-8 h-8 rounded-full border-2 border-white/20" />
-                            <div className="h-3 w-2/3 bg-white/10 rounded-full" />
-                         </div>
-                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex items-center gap-4 opacity-40">
-                            <div className="w-8 h-8 rounded-full border-2 border-white/20" />
-                            <div className="h-3 w-1/3 bg-white/10 rounded-full" />
-                         </div>
-                      </div>
-                   </div>
-                </div>
-              </div>
-           </div>
-        </section>
-
-        {/* Technical Features List */}
-        <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-16 items-center">
-             <div className="lg:w-1/3">
-                <h2 className="text-4xl font-black text-white uppercase tracking-tight mb-6">Engineered for Velocity</h2>
-                <p className="text-slate-400 font-medium leading-relaxed mb-8">
-                  We stripped away the bloat of traditional project management tools. What remains is a hyper-responsive, keyboard-friendly interface that respects your time.
-                </p>
              </div>
              
-             <div className="lg:w-2/3 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05]">
-                  <Terminal className="w-8 h-8 text-emerald-400 mb-4" />
-                  <h4 className="text-lg font-bold text-white uppercase mb-2">Impenetrable Security</h4>
-                  <p className="text-sm text-slate-400">Strict Google Firebase authentication protocols. Your client data and financials are encrypted and isolated.</p>
+             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="hidden md:flex flex-col gap-3 col-span-1">
+                  <div className="h-10 bg-surface border border-ui-border rounded-md" />
+                  <div className="h-10 bg-primary/10 border-l-2 border-primary text-primary font-medium px-4 flex items-center rounded-r-md">Dashboard</div>
+                  <div className="h-10 bg-surface border border-ui-border rounded-md" />
                 </div>
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05]">
-                  <Users className="w-8 h-8 text-indigo-400 mb-4" />
-                  <h4 className="text-lg font-bold text-white uppercase mb-2">CRM Integration</h4>
-                  <p className="text-sm text-slate-400">Maintain a roster of your clientele seamlessly linked to specific projects and billing ledgers.</p>
-                </div>
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05]">
-                  <LayoutDashboard className="w-8 h-8 text-amber-400 mb-4" />
-                  <h4 className="text-lg font-bold text-white uppercase mb-2">Dark Mode Native</h4>
-                  <p className="text-sm text-slate-400">Built from the ground up to reduce eye strain during prolonged development or design sessions.</p>
-                </div>
-                <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/[0.05]">
-                  <Rocket className="w-8 h-8 text-teal-400 mb-4" />
-                  <h4 className="text-lg font-bold text-white uppercase mb-2">Zero Latency</h4>
-                  <p className="text-sm text-slate-400">State mutations are optimistic. Experience a fluid interface that reacts instantly to every command.</p>
+                
+                <div className="col-span-1 md:col-span-3 flex flex-col gap-6">
+                  <div className="grid grid-cols-3 gap-6">
+                     <div className="genesis-card p-5 border border-ui-border bg-surface h-32 flex flex-col justify-end relative overflow-hidden">
+                       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-primary/10 border-t border-primary/20" />
+                       <span className="relative z-10 font-bold text-lg">Velocity</span>
+                     </div>
+                     <div className="genesis-card p-5 border border-ui-border bg-surface h-32 flex flex-col justify-end relative overflow-hidden">
+                       <div className="absolute inset-x-0 bottom-0 h-3/4 bg-blue-500/10 border-t border-blue-500/20" />
+                       <span className="relative z-10 font-bold text-lg">Revenue</span>
+                     </div>
+                     <div className="genesis-card p-5 border border-ui-border bg-surface h-32 flex flex-col justify-end relative overflow-hidden">
+                       <div className="absolute inset-x-0 bottom-0 h-1/4 bg-amber-500/10 border-t border-amber-500/20" />
+                       <span className="relative z-10 font-bold text-lg">Tasks</span>
+                     </div>
+                  </div>
+                  <div className="genesis-card p-6 h-64 border border-ui-border bg-surface flex flex-col">
+                     <div className="w-1/4 h-5 bg-gray-100 rounded mb-8" />
+                     <div className="flex-1 flex items-end gap-3 px-2 border-b border-ui-border">
+                       {[40, 60, 30, 80, 50, 90, 70].map((h, i) => (
+                         <div key={i} className={`flex-1 rounded-t-sm ${i === 3 ? 'bg-primary' : 'bg-gray-200'}`} style={{ height: `${h}%` }} />
+                       ))}
+                     </div>
+                  </div>
                 </div>
              </div>
           </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="py-24 px-6 md:px-12 relative overflow-hidden">
-           <div className="max-w-5xl mx-auto bg-gradient-to-br from-emerald-900/40 to-[#0a0f1d] border border-emerald-500/20 rounded-[3rem] p-12 md:p-24 text-center relative">
-             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay" />
-             <div className="absolute w-96 h-96 bg-emerald-500/20 blur-[100px] rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-             
-             <div className="relative z-10 flex flex-col items-center">
-               <Command className="w-16 h-16 text-emerald-400 mb-8" />
-               <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter uppercase mb-6">
-                 Take Control.
-               </h2>
-               <p className="text-xl text-emerald-100/60 font-medium max-w-2xl mx-auto mb-12">
-                 Join the elite cadre of independent operators running their business on the ultimate operational framework.
-               </p>
-               
-               <button 
-                 onClick={handleLogin}
-                 className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 px-12 py-6 rounded-2xl font-black text-lg uppercase tracking-widest transition-all shadow-[0_0_50px_rgba(16,185,129,0.4)] hover:shadow-[0_0_80px_rgba(16,185,129,0.6)] hover:-translate-y-1 active:translate-y-0"
-               >
-                 Launch Flow OS
-               </button>
-             </div>
-           </div>
-        </section>
+        </motion.div>
       </main>
-      
-      <footer className="border-t border-white/5 py-12 relative z-10 bg-[#020817]">
-         <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center text-slate-900">
-                <Briefcase className="w-4 h-4 font-black" />
+
+      <section className="py-24 bg-surface border-y border-ui-border">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <h2 className="text-3xl font-display text-txt-primary mb-4">Unified Intelligence Architecture</h2>
+            <p className="text-txt-secondary text-lg">Stop context-switching. Freelance Flow brings your projects, finances, and analytics into a single, high-performance display.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="genesis-card p-8 md:col-span-2">
+              <Activity className="w-8 h-8 text-primary mb-6" />
+              <h3 className="text-2xl font-display mb-3">Command Center</h3>
+              <p className="text-txt-secondary mb-6">Instantly perceive the state of your business. Our dashboard aggregates data across all active projects.</p>
+              <div className="flex gap-4 border-t border-ui-border pt-6">
+                <div>
+                  <p className="text-xs text-neutral uppercase tracking-wider mb-1">Analytics</p>
+                  <p className="font-medium text-txt-primary">Workload Distribution</p>
+                </div>
+                <div>
+                  <p className="text-xs text-neutral uppercase tracking-wider mb-1">Tracking</p>
+                  <p className="font-medium text-txt-primary">Task Velocity</p>
+                </div>
               </div>
-              <span className="font-black text-white tracking-tight uppercase text-xl">Flow.</span>
             </div>
-            <div className="text-sm font-bold text-slate-500 uppercase tracking-widest">
-              © {new Date().getFullYear()} Flow Runtime. All Systems Go.
+
+            <div className="genesis-card p-8">
+              <Cpu className="w-8 h-8 text-primary mb-6" />
+              <h3 className="text-xl font-display mb-3">AI Heuristics</h3>
+              <p className="text-txt-secondary mb-8">Continuous artificial intelligence monitors your workloads and predicts bottlenecks before they become risks.</p>
+              <div className="mt-auto flex flex-col gap-3">
+                <div className="h-2 w-full bg-gray-100 rounded-full"><div className="h-full bg-primary rounded-full w-2/3" /></div>
+                <div className="h-2 w-full bg-gray-100 rounded-full"><div className="h-full bg-primary/60 rounded-full w-1/2" /></div>
+              </div>
             </div>
-         </div>
+
+            <div className="genesis-card p-8">
+              <Banknote className="w-8 h-8 text-primary mb-6" />
+              <h3 className="text-xl font-display mb-3">Automated Ledgers</h3>
+              <p className="text-txt-secondary">Generate pristine invoices directly from milestones. Track balances and distribute secure links instantly.</p>
+            </div>
+
+            <div className="genesis-card p-8 md:col-span-2 flex flex-col md:flex-row items-center gap-8">
+              <div className="flex-1">
+                <Layers className="w-8 h-8 text-primary mb-6" />
+                <h3 className="text-2xl font-display mb-3">Project Structuring</h3>
+                <p className="text-txt-secondary">Break massive endeavors into manageable tasks. Assign budgets, structure hourly rates, and categorize via an intuitive hierarchy.</p>
+              </div>
+              <div className="flex-1 w-full space-y-3">
+                <div className="border border-ui-border rounded-md p-3 flex items-center gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-success" />
+                  <div className="h-2 bg-gray-200 rounded w-1/2"/>
+                </div>
+                <div className="border border-ui-border rounded-md p-3 flex items-center gap-3 opacity-60">
+                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full"/>
+                  <div className="h-2 bg-gray-200 rounded w-2/3"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 max-w-5xl mx-auto px-6 text-center">
+        <Command className="w-12 h-12 text-primary mx-auto mb-6" />
+        <h2 className="text-4xl font-display text-txt-primary mb-6">Take Control.</h2>
+        <p className="text-xl text-txt-secondary max-w-2xl mx-auto mb-10">Join the elite cadre of independent operators running their business on the ultimate operational framework.</p>
+        <button onClick={handleLogin} className="btn-primary btn-lg px-10">Launch Freelance Flow Workspace</button>
+      </section>
+
+      <footer className="border-t border-ui-border py-12 bg-bg mt-12">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-primary" />
+            <span className="font-display font-medium text-txt-primary text-lg">Freelance Flow.</span>
+          </div>
+          <p className="text-txt-secondary text-sm">© {new Date().getFullYear()} Freelance Flow. All rights reserved.</p>
+        </div>
       </footer>
     </div>
   );

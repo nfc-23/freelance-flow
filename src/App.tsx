@@ -1,22 +1,7 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
 import { 
-  LayoutDashboard, 
-  Briefcase, 
-  FileText, 
-  Users, 
-  Search, 
-  Bell,
-  Clock,
-  Moon,
-  Sun,
-  LogOut,
-  RefreshCw,
-  Menu,
-  X,
-  CreditCard,
-  Layers,
-  ChevronLeft,
-  ChevronRight
+  LayoutDashboard, Layers, Briefcase, Users, Search, Bell, Clock, 
+  LogOut, RefreshCw, Menu, X, CreditCard, ChevronDown, CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/landing/LandingPage';
@@ -37,6 +22,7 @@ type View = 'dashboard' | 'projects' | 'invoices' | 'clients' | 'settings';
 export default function App() {
   const [activeView, setActiveView] = useState<View>('dashboard');
   const [commandValue, setCommandValue] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleCommand = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && commandValue) {
@@ -45,16 +31,17 @@ export default function App() {
         if (result && result.action === 'NAVIGATE') {
           setActiveView(result.target as View);
           setCommandValue('');
+          setSearchOpen(false);
         }
       }
     }
   };
+
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDark, setIsDark] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   // Check for public views
   const urlParams = new URLSearchParams(window.location.search);
@@ -77,35 +64,29 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // Global search shortcut ⌘K
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [isDark]);
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setSearchOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', down);
+    return () => document.removeEventListener('keydown', down);
+  }, []);
 
-  // Close sidebar on view change (mobile)
   useEffect(() => {
-    setIsSidebarOpen(false);
+    setIsMobileMenuOpen(false);
   }, [activeView]);
-
-  const handleLogin = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
 
   if (loading) {
     return (
-      <div className="h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-dark-bg">
+      <div className="h-screen w-full flex items-center justify-center bg-bg">
         <motion.div 
           animate={{ rotate: 360 }}
           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-10 h-10 border-4 border-brand-600 border-t-transparent rounded-full"
+          className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full"
         />
       </div>
     );
@@ -116,201 +97,54 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-dark-bg text-slate-800 dark:text-slate-200 overflow-hidden transition-colors duration-500 font-sans technical-grid">
-      {/* Mobile Drawer Overlay */}
-      <AnimatePresence>
-        {isSidebarOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSidebarOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Sidebar - Responsive */}
-      <aside className={cn(
-        "fixed inset-y-0 left-0 bg-white dark:bg-dark-card border-r border-slate-200 dark:border-dark-border flex flex-col shrink-0 z-50 transition-all duration-300 transform lg:relative",
-        isDesktopSidebarCollapsed ? "lg:w-24 w-72" : "w-72",
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
-      )}>
-        <button 
-          onClick={() => setIsDesktopSidebarCollapsed(!isDesktopSidebarCollapsed)} 
-          className="absolute -right-3.5 top-8 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border w-7 h-7 rounded-full hidden lg:flex items-center justify-center text-slate-400 hover:text-emerald-500 z-50 shadow-sm transition-transform hover:scale-110"
-        >
-          {isDesktopSidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
-
-        <div className={cn("p-8 flex items-center mb-4 transition-all", isDesktopSidebarCollapsed ? "justify-center px-4" : "justify-between")}>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 shrink-0 bg-brand-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-brand-500/30 rotate-3 transition-transform hover:rotate-6">
-               <Briefcase className="w-5 h-5" />
-            </div>
-            {!isDesktopSidebarCollapsed && <span className="font-bold text-2xl tracking-tight text-slate-900 dark:text-white">Flow</span>}
-          </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-slate-400">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        
-        <nav className="flex-1 px-4 space-y-2 overflow-y-auto overflow-x-hidden">
-          {!isDesktopSidebarCollapsed && <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] mb-4 ml-4 mt-2">Core Console</p>}
-          <SidebarItem 
-            icon={<LayoutDashboard className="w-5 h-5" />} 
-            label="Intelligence Hub" 
-            active={activeView === 'dashboard'} 
-            onClick={() => setActiveView('dashboard')}
-            collapsed={isDesktopSidebarCollapsed}
-          />
-          <SidebarItem 
-            icon={<Briefcase className="w-5 h-5" />} 
-            label="Projects" 
-            active={activeView === 'projects'} 
-            onClick={() => setActiveView('projects')}
-            collapsed={isDesktopSidebarCollapsed}
-          />
-          <SidebarItem 
-            icon={<CreditCard className="w-5 h-5" />} 
-            label="Financial Ledger" 
-            active={activeView === 'invoices'} 
-            onClick={() => setActiveView('invoices')}
-            collapsed={isDesktopSidebarCollapsed}
-          />
-          
-          <div className="pt-8 mb-4">
-            {!isDesktopSidebarCollapsed && <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] mb-4 ml-4">Management</p>}
-            <SidebarItem 
-              icon={<Users className="w-5 h-5" />} 
-              label="Clients" 
-              active={activeView === 'clients'} 
-              onClick={() => setActiveView('clients')}
-              collapsed={isDesktopSidebarCollapsed}
-            />
-            <SidebarItem 
-              icon={<RefreshCw className="w-5 h-5" />} 
-              label="System Settings" 
-              active={activeView === 'settings'} 
-              onClick={() => setActiveView('settings')}
-              collapsed={isDesktopSidebarCollapsed}
-            />
-          </div>
-        </nav>
-
-        {!isDesktopSidebarCollapsed && (
-          <div className="p-6">
-            <div className="p-6 rounded-[2.5rem] bg-emerald-500/5 border border-emerald-500/10 relative overflow-hidden group">
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-              <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-3 relative z-10">Peak Performance</p>
-              <div className="flex items-end justify-between relative z-10">
-                 <span className="text-2xl font-bold text-slate-900 dark:text-white">82%</span>
-                 <div className="flex gap-1 items-end h-8">
-                    {[40, 70, 45, 90, 60].map((h, i) => (
-                      <motion.div 
-                        key={i}
-                        initial={{ height: 0 }}
-                        animate={{ height: `${h}%` }}
-                        className="w-1 bg-emerald-500 rounded-full" 
-                      />
-                    ))}
-                 </div>
+    <div className="min-h-screen bg-bg text-txt-primary flex flex-col font-sans">
+      {/* Top Navigation */}
+      <header className="sticky top-0 z-50 h-[56px] bg-surface/80 backdrop-blur-md border-b border-ui-border flex flex-col justify-center px-4 lg:px-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden text-txt-secondary p-1">
+                <Menu className="w-5 h-5" />
+              </button>
+              <div className="w-8 h-8 rounded border border-ui-border flex items-center justify-center text-primary bg-surface shadow-sm rotate-3 hidden sm:flex">
+                 <Layers className="w-4 h-4" />
               </div>
+              <span className="font-display font-bold text-xl tracking-tight text-txt-primary">Freelance Flow.</span>
             </div>
-          </div>
-        )}
 
-        <div className={cn("border-t border-slate-100 dark:border-dark-border", isDesktopSidebarCollapsed ? "p-4 flex flex-col gap-4 items-center" : "p-4")}>
-          {isDesktopSidebarCollapsed && (
+            {/* Desktop Nav Links */}
+            <nav className="hidden lg:flex items-center gap-1">
+              <NavLink label="Dashboard" active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
+              <NavLink label="Projects" active={activeView === 'projects'} onClick={() => setActiveView('projects')} />
+              <NavLink label="Invoices" active={activeView === 'invoices'} onClick={() => setActiveView('invoices')} />
+              <NavLink label="Clients" active={activeView === 'clients'} onClick={() => setActiveView('clients')} />
+              <NavLink label="Settings" active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-4">
             <button 
-              onClick={() => auth.signOut()}
-              title="Sign Out"
-              className="text-slate-400 hover:text-red-500 transition-colors p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-dark-border"
+              onClick={() => setSearchOpen(true)}
+              className="hidden md:flex items-center gap-2 bg-gray-50 border border-ui-border/50 hover:bg-gray-100 rounded-xl px-3 py-1.5 text-txt-secondary text-sm transition-colors"
             >
-              <LogOut className="w-5 h-5" />
+              <Search className="w-4 h-4" />
+              <span className="mr-4 text-xs font-medium">Search or command...</span>
+              <kbd className="hidden sm:inline-flex h-5 items-center gap-1 rounded bg-surface border border-ui-border px-1.5 font-mono text-[10px] font-medium opacity-100">
+                <span className="text-xs">⌘</span>K
+              </kbd>
             </button>
-          )}
 
-          <div className={cn("flex space-x-3 rounded-xl transition-colors cursor-pointer group", isDesktopSidebarCollapsed ? "p-0 justify-center" : "p-2 hover:bg-slate-50 dark:hover:bg-emerald-500/5 items-center")}>
-            {user.photoURL ? (
-              <img src={user.photoURL} alt={user.displayName || 'User'} className="w-10 h-10 shrink-0 rounded-full border border-slate-100 dark:border-dark-border" />
-            ) : (
-              <div className="w-10 h-10 shrink-0 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold">
-                {user.displayName?.charAt(0) || 'U'}
-              </div>
-            )}
-            {!isDesktopSidebarCollapsed && (
-              <>
-                <div className="overflow-hidden">
-                  <p className="text-sm font-semibold truncate dark:text-slate-200">{user.displayName || 'Freelancer'}</p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500 truncate">Pro Account</p>
-                </div>
-                <button 
-                  onClick={() => auth.signOut()}
-                  title="Sign Out"
-                  className="ml-auto text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden relative transition-colors duration-500">
-        <header className="h-24 bg-white/70 dark:bg-dark-bg/70 backdrop-blur-xl px-4 lg:px-10 flex items-center justify-between shrink-0 z-10 border-b border-slate-100 dark:border-dark-border transition-colors duration-500">
-          <div className="flex items-center gap-3 lg:gap-4 shrink-0 min-w-0 pr-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 bg-slate-100 dark:bg-dark-card hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors rounded-xl text-slate-500"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex flex-col">
-              <h1 className="text-[10px] sm:text-xs lg:text-sm font-black text-slate-900 dark:text-white uppercase tracking-[0.4em] truncate">
-                {activeView === 'settings' ? 'Global Configuration' : activeView}
-              </h1>
-              <div className="flex items-center gap-2 mt-1">
-                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Core Synchronized</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-2 lg:space-x-5 shrink-0">
-            <div className="hidden lg:relative lg:block group">
-              <div className="absolute inset-0 bg-brand-500/5 rounded-2xl blur-md group-focus-within:bg-brand-500/10 transition-all" />
-              <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-brand-500 transition-colors" />
-              <input 
-                type="text" 
-                placeholder="EXECUTE COMMAND (/) ..." 
-                value={commandValue}
-                onChange={(e) => setCommandValue(e.target.value)}
-                onKeyDown={handleCommand}
-                className="relative pl-12 pr-6 py-3 bg-slate-100 dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-2xl text-[10px] font-black uppercase tracking-widest focus:ring-2 focus:ring-brand-500/20 transition-all w-80 outline-none dark:text-slate-200 group-hover:border-brand-500/30"
-              />
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 px-1.5 py-0.5 bg-slate-200 dark:bg-dark-border rounded text-[9px] font-bold text-slate-500">
-                 K
-              </div>
-            </div>
-
-            <button 
-              onClick={() => setIsDark(!isDark)}
-              className="p-2.5 bg-slate-100 dark:bg-dark-card text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-all rounded-xl"
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            <button className="md:hidden p-2 text-txt-secondary" onClick={() => setSearchOpen(true)}>
+              <Search className="w-5 h-5" />
             </button>
 
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2.5 bg-slate-100 dark:bg-dark-card text-slate-400 hover:text-brand-600 transition-all rounded-xl relative"
+                className="p-2 text-txt-secondary hover:text-txt-primary hover:bg-black/5 rounded-full transition-all relative"
               >
-                <Bell className="w-4 h-4" />
-                <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-brand-500 rounded-full border-2 border-white dark:border-dark-card"></span>
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
               </button>
 
               <AnimatePresence>
@@ -319,74 +153,153 @@ export default function App() {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-3 w-80 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border rounded-3xl shadow-xl overflow-hidden z-50 origin-top-right flex flex-col"
+                    className="absolute right-0 top-full mt-2 w-80 bg-surface border border-ui-border rounded-xl shadow-[var(--shadow-genesis-dropdown)] overflow-hidden z-[60] origin-top-right flex flex-col"
                   >
-                    <div className="p-5 border-b border-slate-100 dark:border-dark-border flex justify-between items-center">
-                      <h3 className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">System Feed</h3>
-                      <button 
-                        onClick={() => setShowNotifications(false)}
-                        className="text-slate-400 hover:text-rose-500 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                    <div className="p-4 border-b border-ui-border flex justify-between items-center bg-gray-50/50">
+                      <h3 className="text-sm font-semibold text-txt-primary">Notifications</h3>
+                      <button onClick={() => setShowNotifications(false)} className="text-txt-secondary hover:text-txt-primary"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
-                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
-                        <div className="flex gap-4 items-start">
-                          <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
-                            <Clock className="w-4 h-4 text-emerald-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">Daily sync report generated</p>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">AI analysis on active projects complete. Velocity is nominal.</p>
-                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">12 MINS AGO</span>
-                          </div>
+                      <div className="p-3 hover:bg-black/5 rounded-lg transition-colors cursor-pointer flex gap-4 items-start">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
                         </div>
-                      </div>
-                      
-                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
-                        <div className="flex gap-4 items-start">
-                          <div className="w-8 h-8 rounded-full bg-brand-500/10 flex items-center justify-center shrink-0">
-                            <CreditCard className="w-4 h-4 text-brand-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-brand-500 transition-colors">Invoice Paid</p>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">Client just settled invoice INV-281 for $4,500.</p>
-                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">2 HOURS AGO</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-2xl transition-colors cursor-pointer group">
-                        <div className="flex gap-4 items-start">
-                          <div className="w-8 h-8 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
-                            <Users className="w-4 h-4 text-indigo-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-500 transition-colors">New Portal Activity</p>
-                            <p className="text-xs text-slate-500 mt-1 line-clamp-2">Acme Corp viewed the latest project update.</p>
-                            <span className="text-[10px] font-bold text-slate-400 mt-2 block">5 HOURS AGO</span>
-                          </div>
+                        <div>
+                          <p className="text-[13px] font-medium text-txt-primary">Invoice Paid</p>
+                          <p className="text-[12px] text-txt-secondary mt-1">Client just settled invoice INV-281 for $4,500.</p>
+                          <span className="text-[10px] text-neutral mt-2 block">2 HOURS AGO</span>
                         </div>
                       </div>
                     </div>
-                    <div className="p-3 border-t border-slate-100 dark:border-dark-border bg-slate-50 dark:bg-dark-bg/50 text-center">
-                      <button className="text-[10px] font-black uppercase tracking-widest text-brand-500 hover:text-brand-600 transition-colors">
-                        Mark all as read
-                      </button>
+                    <div className="p-3 border-t border-ui-border bg-gray-50 text-center">
+                      <button className="text-[12px] font-medium text-primary hover:text-primary-hover transition-colors">Mark all as read</button>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
-            
-            <button className="hidden sm:block p-2 text-slate-400 hover:text-brand-600 transition-all rounded-xl border border-slate-200 dark:border-dark-border">
-               <Layers className="w-4 h-4" />
-            </button>
-          </div>
-        </header>
 
-        <div className="p-6 lg:p-10 overflow-y-auto flex-1 custom-scrollbar">
+            <div className="relative">
+              <button 
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-2 pl-2 p-1 rounded-full hover:bg-black/5 transition-colors focus:outline-none"
+              >
+                {user.photoURL ? (
+                  <img src={user.photoURL} alt={user.displayName || 'User'} className="w-8 h-8 rounded-full border border-ui-border" />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+                    {user.displayName?.charAt(0) || 'U'}
+                  </div>
+                )}
+                <ChevronDown className="w-4 h-4 text-txt-secondary" />
+              </button>
+
+              <AnimatePresence>
+                {showProfileMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-2 w-56 bg-surface border border-ui-border rounded-xl shadow-[var(--shadow-genesis-dropdown)] overflow-hidden z-[60] origin-top-right py-1"
+                  >
+                    <div className="px-4 py-3 border-b border-ui-border bg-gray-50/50">
+                      <p className="text-sm font-medium text-txt-primary truncate">{user.displayName || 'Freelancer'}</p>
+                      <p className="text-xs text-txt-secondary truncate">{user.email}</p>
+                    </div>
+                    <button 
+                      onClick={() => { auth.signOut(); setShowProfileMenu(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-error hover:bg-error/5 flex items-center gap-2 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Global Search CMD+K Modal */}
+      <AnimatePresence>
+        {searchOpen && (
+          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-24 sm:pt-32">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-txt-primary/20 backdrop-blur-sm"
+              onClick={() => setSearchOpen(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: -20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: -20 }}
+              className="relative w-[90%] max-w-2xl bg-surface border border-ui-border shadow-2xl rounded-xl overflow-hidden z-[101]"
+            >
+              <div className="flex items-center px-4 border-b border-ui-border bg-surface">
+                <Search className="w-5 h-5 text-txt-secondary flex-shrink-0" />
+                <input 
+                  autoFocus
+                  type="text" 
+                  className="flex-1 h-16 bg-transparent border-none outline-none px-4 text-lg text-txt-primary placeholder:text-neutral"
+                  placeholder="Ask AI or type a command (/) ..."
+                  value={commandValue}
+                  onChange={(e) => setCommandValue(e.target.value)}
+                  onKeyDown={handleCommand}
+                />
+                <button onClick={() => setSearchOpen(false)} className="text-[10px] font-bold text-neutral bg-gray-100 px-2 py-1 rounded">ESC</button>
+              </div>
+              <div className="p-4 bg-gray-50/50 h-56 overflow-y-auto custom-scrollbar">
+                <p className="text-xs font-semibold text-neutral uppercase tracking-wider mb-3">Suggestions</p>
+                <div className="space-y-1">
+                  <div className="px-3 py-2 text-sm text-txt-primary hover:bg-black/5 rounded-md cursor-pointer flex items-center gap-3">
+                    <LayoutDashboard className="w-4 h-4 text-txt-secondary" /> Go to Dashboard
+                  </div>
+                  <div className="px-3 py-2 text-sm text-txt-primary hover:bg-black/5 rounded-md cursor-pointer flex items-center gap-3">
+                    <CreditCard className="w-4 h-4 text-txt-secondary" /> Create New Invoice
+                  </div>
+                  <div className="px-3 py-2 text-sm text-txt-primary hover:bg-black/5 rounded-md cursor-pointer flex items-center gap-3">
+                    <Search className="w-4 h-4 text-txt-secondary" /> Search active projects...
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Mobile Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-[60] lg:hidden">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-txt-primary/20 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-surface border-r border-ui-border shadow-2xl flex flex-col"
+            >
+              <div className="p-4 border-b border-ui-border flex justify-between items-center">
+                <span className="font-display font-bold text-xl text-txt-primary">Menu</span>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2 text-txt-secondary hover:bg-gray-100 rounded-full flex items-center justify-center">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <nav className="p-4 flex flex-col gap-1 overflow-y-auto">
+                <MobileNavItem icon={<LayoutDashboard className="w-5 h-5"/>} label="Dashboard" active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
+                <MobileNavItem icon={<Briefcase className="w-5 h-5"/>} label="Projects" active={activeView === 'projects'} onClick={() => setActiveView('projects')} />
+                <MobileNavItem icon={<CreditCard className="w-5 h-5"/>} label="Invoices" active={activeView === 'invoices'} onClick={() => setActiveView('invoices')} />
+                <MobileNavItem icon={<Users className="w-5 h-5"/>} label="Clients" active={activeView === 'clients'} onClick={() => setActiveView('clients')} />
+                <MobileNavItem icon={<RefreshCw className="w-5 h-5"/>} label="Settings" active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
+              </nav>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto relative w-full h-full pb-12 custom-scrollbar">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeView}
@@ -401,68 +314,48 @@ export default function App() {
               {activeView === 'invoices' && <InvoiceList />}
               {activeView === 'settings' && <SystemSettings onReset={() => window.location.reload()} />}
               {activeView !== 'dashboard' && activeView !== 'projects' && activeView !== 'clients' && activeView !== 'invoices' && activeView !== 'settings' && (
-                <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400 dark:text-slate-600">
-                  <div className="w-20 h-20 rounded-[2rem] bg-slate-100 dark:bg-dark-card flex items-center justify-center mb-6 border border-slate-200 dark:border-dark-border">
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-txt-secondary">
+                  <div className="w-16 h-16 rounded-xl bg-gray-50 flex items-center justify-center mb-6 border border-ui-border">
                      <Clock className="w-8 h-8 opacity-20" />
                   </div>
-                  <p className="text-xl font-bold opacity-50">{activeView} module arriving soon...</p>
+                  <p className="text-lg font-medium opacity-50">{activeView} module arriving soon...</p>
                 </div>
               )}
             </motion.div>
           </AnimatePresence>
-        </div>
-
-        {/* Mobile Nav Bar */}
-        <div className="lg:hidden h-20 bg-white/80 dark:bg-dark-card/80 backdrop-blur-xl border-t border-slate-200 dark:border-dark-border flex items-center justify-around px-2 sm:px-6 shrink-0 transition-colors z-20 pb-[env(safe-area-inset-bottom)]">
-            <MobileNavItem icon={<LayoutDashboard className="w-5 h-5 lg:w-6 lg:h-6"/>} active={activeView === 'dashboard'} onClick={() => setActiveView('dashboard')} />
-            <MobileNavItem icon={<Briefcase className="w-5 h-5 lg:w-6 lg:h-6"/>} active={activeView === 'projects'} onClick={() => setActiveView('projects')} />
-            <MobileNavItem icon={<Users className="w-5 h-5 lg:w-6 lg:h-6"/>} active={activeView === 'clients'} onClick={() => setActiveView('clients')} />
-            <MobileNavItem icon={<CreditCard className="w-5 h-5 lg:w-6 lg:h-6"/>} active={activeView === 'invoices'} onClick={() => setActiveView('invoices')} />
-            <MobileNavItem icon={<RefreshCw className="w-5 h-5 lg:w-6 lg:h-6"/>} active={activeView === 'settings'} onClick={() => setActiveView('settings')} />
         </div>
       </main>
     </div>
   );
 }
 
-function SidebarItem({ icon, label, active, onClick, collapsed }: { icon: ReactNode, label: string, active?: boolean, onClick: () => void, collapsed?: boolean }) {
+function NavLink({ label, active, onClick }: { label: string, active: boolean, onClick: () => void }) {
   return (
     <button 
       onClick={onClick}
       className={cn(
-        "w-full flex items-center px-4 py-3 rounded-2xl transition-all font-semibold text-sm relative group",
-        collapsed ? "justify-center" : "space-x-3",
+        "px-4 py-2 rounded-md text-[14px] font-medium transition-colors relative",
         active 
-          ? "text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-500/5" 
-          : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-dark-bg"
+          ? "text-txt-primary bg-black/5" 
+          : "text-txt-secondary hover:bg-black/5 hover:text-txt-primary"
       )}
-      title={collapsed ? label : undefined}
     >
-      <div className={cn("transition-colors duration-300 z-10 flex-shrink-0", active ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400 dark:text-slate-500 group-hover:text-emerald-500")}>
-        {icon}
-      </div>
-      {!collapsed && <span className="z-10 truncate">{label}</span>}
-      {active && (
-        <motion.div 
-          layoutId="active-bg"
-          className="absolute inset-0 rounded-2xl border-l-4 border-emerald-500" 
-        />
-      )}
+      {label}
     </button>
   );
 }
 
-function MobileNavItem({ icon, active, onClick }: { icon: ReactNode, active: boolean, onClick: () => void }) {
+function MobileNavItem({ icon, label, active, onClick }: { icon: ReactNode, label: string, active: boolean, onClick: () => void }) {
   return (
     <button 
       onClick={onClick}
       className={cn(
-        "p-3 rounded-2xl transition-all relative",
-        active ? "text-brand-600" : "text-slate-400"
+        "flex items-center gap-3 w-full px-4 py-3 rounded-lg text-[15px] font-medium transition-all",
+        active ? "bg-primary/10 text-primary" : "text-txt-secondary hover:bg-black/5 hover:text-txt-primary"
       )}
     >
-      <div className="relative z-10">{icon}</div>
-      {active && <motion.div layoutId="mobile-nav-active" className="absolute inset-0 bg-brand-500/10 rounded-2xl" />}
+      {icon}
+      {label}
     </button>
   );
 }

@@ -1,86 +1,135 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700,800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "General Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --color-brand-50: #EEF2FF;
-  --color-brand-100: #E0E7FF;
-  --color-brand-200: #C7D2FE;
-  --color-brand-300: #A5B4FC;
-  --color-brand-400: #818CF8;
-  --color-brand-500: #6366F1;
-  --color-brand-600: #4F46E5;
-  --color-brand-700: #4338CA;
-  --color-brand-800: #3730A3;
-  --color-brand-900: #312E81;
+  --color-primary: #6366F1;
+  --color-primary-hover: #4F46E5;
+  --color-secondary: #20970B;
   
-  --color-dark-bg: #09090B;
-  --color-dark-card: #121217;
-  --color-dark-border: #1E1E26;
+  --color-bg: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-txt-primary: #0A0A0A;
+  --color-txt-secondary: #6B6B6B;
+  --color-neutral: #9C9C9C;
+  --color-ui-border: #E8E8EC;
+  
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
 
-  --chart-grid: #e2e8f0;
-  --chart-text: #94a3b8;
-  --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-text: #1e293b;
-
-  --shadow-custom: 0 1px 3px 0 rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.06);
+  --shadow-genesis: 0 8px 30px rgba(0,0,0,0.08);
+  --shadow-genesis-btn: 0 4px 12px rgba(99,102,241,0.35);
 }
 
 @layer base {
   body {
-    @apply bg-[#FBFBFC] text-slate-800 antialiased transition-colors duration-300 cursor-default;
+    @apply bg-bg text-txt-primary antialiased;
     font-family: var(--font-sans);
   }
   
-  .dark {
-    --chart-grid: #1e1e26;
-    --chart-text: #475569;
-    --chart-tooltip-bg: #121217;
-    --chart-tooltip-text: #f8fafc;
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+    @apply font-bold tracking-[-0.03em]; /* tight letter spacing */
   }
 
-  .dark body {
-    @apply bg-dark-bg text-slate-100;
+  /* Ensure focus states globally */
+  *:focus-visible {
+    @apply outline-none ring-[3px] ring-primary/12 border-primary;
   }
 }
 
 @layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 bg-primary text-white rounded-md font-medium transition-all duration-200 border border-transparent shadow-none;
+    &:hover {
+      @apply bg-primary-hover shadow-[var(--shadow-genesis-btn)] -translate-y-[1px];
+    }
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 bg-transparent text-txt-primary border border-ui-border rounded-md font-medium transition-all duration-200 shadow-none;
+    &:hover {
+      @apply -translate-y-[1px] bg-black/5;
+    }
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 bg-transparent text-txt-secondary font-medium transition-all duration-200 border-none shadow-none;
+    &:hover {
+      @apply text-txt-primary bg-black/5;
+    }
+  }
+  
+  .btn-destructive {
+    @apply inline-flex items-center justify-center gap-2 text-error border border-error bg-transparent rounded-md font-medium transition-all duration-200;
+    &:hover {
+      @apply -translate-y-[1px] bg-error/5;
+    }
+  }
+
+  .btn-sm {
+    @apply h-[32px] px-3 text-[13px];
+  }
+  
+  .btn-md {
+    @apply h-[38px] px-4 text-[14px];
+  }
+  
+  .btn-lg {
+    @apply h-[44px] px-6 text-[15px];
+  }
+
+  .genesis-card {
+    @apply bg-surface border border-ui-border rounded-xl transition-all duration-200 overflow-hidden shadow-none;
+    &:hover {
+      @apply shadow-[var(--shadow-genesis)] -translate-y-[2px];
+    }
+  }
+
+  .input-default {
+    @apply w-full border border-ui-border bg-surface rounded-md px-[14px] py-[10px] text-[14px] transition-all;
+    &:focus {
+      @apply border-primary ring-[3px] ring-primary/12 outline-none;
+    }
+    &::placeholder {
+      @apply text-neutral;
+    }
+  }
+  
+  .input-default-error {
+    @apply border-error;
+  }
+
+  .chip-default {
+    @apply rounded-full bg-gray-100 text-gray-600 px-3 py-1 text-[12px];
+  }
+  
+  .chip-active {
+    @apply rounded-full bg-primary text-white px-3 py-1 text-[12px];
+  }
+
+  .list-row {
+    @apply flex justify-between items-center py-3 px-4 border-b border-ui-border transition-colors;
+    &:hover {
+      @apply bg-black/[0.02];
+    }
+    &:last-child {
+      @apply border-b-0;
+    }
+  }
+
+  /* Legacy mappings from app */
   .sidebar-active {
-    @apply bg-brand-50 text-brand-600 border-r-4 border-brand-600 font-semibold;
-  }
-
-  .dark .sidebar-active {
-    @apply bg-brand-600/10 text-brand-400 border-r-4 border-brand-500;
-  }
-  
-  .glass-card {
-    @apply bg-white border border-slate-200 shadow-custom ring-1 ring-slate-100;
-  }
-  
-  .dark .glass-card {
-    @apply bg-dark-card/80 border-dark-border backdrop-blur-md ring-1 ring-white/5;
-    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), 0 2px 12px -1px rgba(0, 0, 0, 0.3);
-  }
-
-  .tech-card {
-    @apply bg-white dark:bg-dark-card/80 border border-slate-200 dark:border-dark-border rounded-[2.5rem] p-8 overflow-hidden relative transition-all duration-500 shadow-custom ring-1 ring-slate-100 dark:ring-white/5;
-  }
-  
-  .dark .tech-card {
-    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.5), 0 2px 12px -1px rgba(0, 0, 0, 0.3);
+    @apply text-primary bg-primary/10 font-bold; /* Removed border */
   }
 }
 
 @layer utilities {
-  .technical-grid {
-    background-image: 
-      linear-gradient(rgba(99, 102, 241, 0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(99, 102, 241, 0.02) 1px, transparent 1px);
-    background-size: 32px 32px;
-  }
-
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
@@ -90,6 +139,6 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 dark:bg-dark-border rounded-full hover:bg-slate-300 dark:hover:bg-slate-800 transition-colors;
+    @apply bg-ui-border rounded-full hover:bg-neutral transition-colors;
   }
 }
