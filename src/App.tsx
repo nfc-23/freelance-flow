@@ -8,7 +8,7 @@ import { LandingPage } from './components/landing/LandingPage';
 import { cn } from './lib/utils';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
-import { collection, query, where, orderBy, onSnapshot, doc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, orderBy, onSnapshot, doc, writeBatch, updateDoc } from 'firebase/firestore';
 import { ClientList } from './components/clients/ClientList';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ProjectList } from './components/projects/ProjectList';

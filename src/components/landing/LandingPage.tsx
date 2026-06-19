@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2 } from 'lucide-react';
+import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2, X } from 'lucide-react';
 import { auth } from '../../services/firebase';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,10 +18,16 @@ export function LandingPage() {
 
   const handleLogin = async () => {
     const provider = new GoogleAuthProvider();
+    setAuthError(null);
     try {
       await signInWithPopup(auth, provider);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Login failed:", error);
+      if (error && (error.code === 'auth/popup-closed-by-user' || error.message?.includes('popup-closed-by-user'))) {
+        setAuthError("The login popup was closed. Please try again or check if popups are blocked by your browser.");
+      } else {
+        setAuthError(error?.message || "An unexpected error occurred during login. Please try again.");
+      }
     }
   };
 
@@ -43,7 +50,23 @@ export function LandingPage() {
       </nav>
 
       <main className="relative pt-32 lg:pt-48 pb-24">
-        {/* Decorative subtle dot grid */}
+{/* Decorative subtle dot grid */}
+        {authError && (
+          <div className="max-w-md mx-auto mb-8 p-4 rounded-xl border border-red-500/10 bg-red-500/5 text-red-600 text-sm flex flex-col gap-2 relative shadow-sm text-center z-20">
+            <div className="flex items-center gap-2 justify-center font-semibold text-red-700">
+              <Activity className="w-4 h-4 shrink-0 text-red-600 animate-pulse" />
+              <span>Access Interrupted</span>
+            </div>
+            <p className="text-xs text-red-600/95 leading-relaxed">{authError}</p>
+            <button 
+              type="button"
+              onClick={() => setAuthError(null)} 
+              className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition-colors p-1"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         <div className="absolute inset-0 pointer-events-none opacity-40 mix-blend-multiply" style={{ backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, rgba(99, 102, 241, 0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
 
         <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
