@@ -10,7 +10,7 @@ import { firestoreService } from '../../services/firestoreService';
 import { generateProjectInsights, type ProjectInsight } from '../../services/aiService';
 import { auth } from '../../services/firebase';
 
-const defaultEarningsData = [
+const defaultEarningsDataUnused = [
   { name: 'Mon', value: 400 }, { name: 'Tue', value: 300 }, { name: 'Wed', value: 600 },
   { name: 'Thu', value: 800 }, { name: 'Fri', value: 500 }, { name: 'Sat', value: 900 }, { name: 'Sun', value: 700 },
 ];
@@ -23,12 +23,25 @@ const taskVelocityData = [
   { name: 'Week 3', completed: 25, added: 20 }, { name: 'Week 4', completed: 32, added: 25 }, { name: 'Week 5', completed: 40, added: 30 },
 ];
 
+const defaultTrendData = [
+  { name: 'Jan', income: 4200, expenses: 1800 },
+  { name: 'Feb', income: 5100, expenses: 2200 },
+  { name: 'Mar', income: 4800, expenses: 2100 },
+  { name: 'Apr', income: 6300, expenses: 2800 },
+  { name: 'May', income: 5900, expenses: 2400 },
+  { name: 'Jun', income: 7200, expenses: 3100 }
+];
+
 export function Dashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [aiInsights, setAiInsights] = useState<ProjectInsight[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const user = auth.currentUser;
+
+  const trendData = stats?.financialTrendData?.some((d: any) => d.income > 0 || d.expenses > 0)
+    ? stats.financialTrendData
+    : defaultTrendData;
 
   useEffect(() => { loadStats(); }, []);
 
@@ -204,10 +217,54 @@ export function Dashboard() {
            </div>
         </motion.div>
 
-        <motion.div variants={itemVariants} className="xl:col-span-3 genesis-card p-6 flex flex-col">
-           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <div>
-                 <h3 className="text-xl font-display mb-1">Task Velocity</h3>
+                 <motion.div variants={itemVariants} className="xl:col-span-3 genesis-card p-6 flex flex-col">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+               <div>
+                  <h3 className="text-xl font-display mb-1">Financial Trajectory</h3>
+                  <p className="text-txt-secondary text-sm">Monthly income vs. business expenses cashflow trend</p>
+               </div>
+               <div className="flex gap-4 text-xs font-medium">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 text-success border border-emerald-500/20">
+                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                     <span>Income</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                     <span>Expenses</span>
+                  </div>
+               </div>
+            </div>
+            <div className="h-[300px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={trendData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
+                     <defs>
+                        <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                           <stop offset="95%" stopColor="#10b981" stopOpacity={0.01}/>
+                        </linearGradient>
+                        <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                           <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
+                           <stop offset="95%" stopColor="#ef4444" stopOpacity={0.01}/>
+                        </linearGradient>
+                     </defs>
+                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E8E8EC" />
+                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B6B6B' }} dy={10} />
+                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6B6B6B' }} tickFormatter={(val) => `${val}`} />
+                     <Tooltip 
+                        contentStyle={{ borderRadius: '12px', border: '1px solid #E8E8EC', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)', background: '#fff' }} 
+                        formatter={(value) => [formatCurrency(Number(value)), '']}
+                     />
+                     <Area type="monotone" dataKey="income" name="Income" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#incomeGrad)" />
+                     <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#expenseGrad)" />
+                  </AreaChart>
+               </ResponsiveContainer>
+            </div>
+         </motion.div>
+
+         <motion.div variants={itemVariants} className="xl:col-span-3 genesis-card p-6 flex flex-col">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+               <div>
+                  <h3 className="text-xl font-display mb-1">Task Velocity</h3>
                  <p className="text-txt-secondary text-sm">Creation vs Completion trajectory</p>
               </div>
            </div>

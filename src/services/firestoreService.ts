@@ -394,7 +394,9 @@ export const firestoreService = {
           month: d.getMonth(),
           year: d.getFullYear(),
           name: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][d.getMonth()],
-          value: 0
+          value: 0,
+          income: 0,
+          expenses: 0
         };
       });
 
@@ -403,6 +405,7 @@ export const firestoreService = {
         const entry = earningsDataList.find(e => e.month === issueDate.getMonth() && e.year === issueDate.getFullYear());
         if (entry) {
           entry.value += Number(inv.amount || 0);
+          entry.income += Number(inv.amount || 0);
         }
       });
 
@@ -411,10 +414,12 @@ export const firestoreService = {
         const entry = earningsDataList.find(en => en.month === d.getMonth() && en.year === d.getFullYear());
         if (entry) {
           entry.value -= Number(e.amount || 0);
+          entry.expenses += Number(e.amount || 0);
         }
       });
 
       const earningsData = earningsDataList.map(e => ({ name: e.name, value: e.value }));
+      const financialTrendData = earningsDataList.map(e => ({ name: e.name, income: e.income, expenses: e.expenses }));
 
       // 4. Project Distribution (by Type)
       const typeDistributionData: Record<string, number> = {};
@@ -466,6 +471,7 @@ export const firestoreService = {
         activeProjects: fullProjects.filter((p: any) => ['active', 'started', 'planned', 'in-progress'].includes(p.status)).slice(0, 5),
         statusDistribution,
         earningsData,
+        financialTrendData,
         projectDistribution
       };
     } catch (error) {

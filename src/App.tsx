@@ -71,12 +71,34 @@ export default function App() {
       setNotifications([]);
       return;
     }
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     const q = query(
       collection(db, 'notifications'), 
       where('userId', '==', user.uid),
       orderBy('createdAt', 'desc')
     );
     const unsubscribe = onSnapshot(q, (snap) => {
+      snap.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const docData = change.doc.data();
+          // Notify if created in the last 5 seconds to avoid old notifications alerting
+          const isRecent = docData.createdAt && (Date.now() / 1000 - docData.createdAt.seconds) < 5;
+          if (isRecent && "Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification(docData.title || "New Notification", {
+                body: docData.message,
+              });
+            } catch (e) {
+              // Sometimes Notification constructor fails if not in a service worker depending on browser restrictions
+              console.error("Notification API failed:", e);
+            }
+          }
+        }
+      });
+
       setNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     });
     return () => unsubscribe();
