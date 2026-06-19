@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/landing/LandingPage';
 import { cn } from './lib/utils';
 import { auth, db } from './services/firebase';
+import { Toaster, toast } from 'react-hot-toast';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
 import { collection, query, where, orderBy, onSnapshot, doc, writeBatch, updateDoc } from 'firebase/firestore';
 import { ClientList } from './components/clients/ClientList';
@@ -86,14 +87,26 @@ export default function App() {
           const docData = change.doc.data();
           // Notify if created in the last 5 seconds to avoid old notifications alerting
           const isRecent = docData.createdAt && (Date.now() / 1000 - docData.createdAt.seconds) < 5;
-          if (isRecent && "Notification" in window && Notification.permission === "granted") {
-            try {
-              new Notification(docData.title || "New Notification", {
-                body: docData.message,
-              });
-            } catch (e) {
-              // Sometimes Notification constructor fails if not in a service worker depending on browser restrictions
-              console.error("Notification API failed:", e);
+          if (isRecent) {
+            // Internal toast notification
+            toast.success(docData.title || "New Notification", {
+              icon: '🔔',
+              style: {
+                borderRadius: '10px',
+                background: '#fff',
+                color: '#333',
+              },
+            });
+
+            if ("Notification" in window && Notification.permission === "granted") {
+              try {
+                new Notification(docData.title || "New Notification", {
+                  body: docData.message,
+                });
+              } catch (e) {
+                // Sometimes Notification constructor fails if not in a service worker depending on browser restrictions
+                console.error("Notification API failed:", e);
+              }
             }
           }
         }
@@ -148,6 +161,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-bg text-txt-primary flex flex-col font-sans">
+      <Toaster position="top-right" />
       {/* Top Navigation */}
       <header className="sticky top-0 z-50 h-[56px] bg-surface/80 backdrop-blur-md border-b border-ui-border flex flex-col justify-center px-4 lg:px-6">
         <div className="flex items-center justify-between">
