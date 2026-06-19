@@ -6,8 +6,9 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { LandingPage } from './components/landing/LandingPage';
 import { cn } from './lib/utils';
-import { auth } from './services/firebase';
+import { auth, db } from './services/firebase';
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, type User } from 'firebase/auth';
+import { collection, query, where, orderBy, onSnapshot, doc, writeBatch } from 'firebase/firestore';
 import { ClientList } from './components/clients/ClientList';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ProjectList } from './components/projects/ProjectList';
@@ -42,6 +43,7 @@ export default function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [notifications, setNotifications] = useState<any[]>([]);
 
   // Check for public views
   const urlParams = new URLSearchParams(window.location.search);
@@ -63,6 +65,32 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+    const q = query(
+      collection(db, 'notifications'), 
+      where('userId', '==', user.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const unsubscribe = onSnapshot(q, (snap) => {
+      setNotifications(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+    });
+    return () => unsubscribe();
+  }, [user]);
+
+  const markAllRead = async () => {
+    try {
+      const batch = writeBatch(db);
+      notifications.filter(n => !n.read).forEach(n => {
+        batch.update(doc(db, 'notifications', n.id), { read: true });
+      });
+      await batch.commit();
+    } catch(err) {}
+  };
 
   // Global search shortcut ⌘K
   useEffect(() => {
@@ -144,7 +172,9 @@ export default function App() {
                 className="p-2 text-txt-secondary hover:text-txt-primary hover:bg-black/5 rounded-full transition-all relative"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
+                {notifications.some(n => !n.read) && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full border-2 border-surface"></span>
+                )}
               </button>
 
               <AnimatePresence>
@@ -160,19 +190,44 @@ export default function App() {
                       <button onClick={() => setShowNotifications(false)} className="text-txt-secondary hover:text-txt-primary"><X className="w-4 h-4" /></button>
                     </div>
                     <div className="max-h-80 overflow-y-auto p-2 custom-scrollbar">
-                      <div className="p-3 hover:bg-black/5 rounded-lg transition-colors cursor-pointer flex gap-4 items-start">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-txt-secondary">
+                          No notifications yet.
                         </div>
-                        <div>
-                          <p className="text-[13px] font-medium text-txt-primary">Invoice Paid</p>
-                          <p className="text-[12px] text-txt-secondary mt-1">Client just settled invoice INV-281 for $4,500.</p>
-                          <span className="text-[10px] text-neutral mt-2 block">2 HOURS AGO</span>
-                        </div>
-                      </div>
+                      ) : (
+                        notifications.map((n, i) => (
+                          <div 
+                            key={i} 
+                            className={cn(
+                              "p-3 rounded-lg transition-colors cursor-pointer flex gap-4 items-start",
+                              n.read ? "hover:bg-black/5" : "bg-primary/5 hover:bg-primary/10"
+                            )}
+                            onClick={() => {
+                              if (!n.read) {
+                                updateDoc(doc(db, 'notifications', n.id), { read: true });
+                              }
+                              if (n.link && n.type === 'message') {
+                                setActiveView('projects');
+                                setShowNotifications(false);
+                              }
+                            }}
+                          >
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <Bell className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className={cn("text-[13px] text-txt-primary", !n.read && "font-bold")}>{n.title}</p>
+                              <p className="text-[12px] text-txt-secondary mt-1">{n.message}</p>
+                              <span className="text-[10px] text-neutral mt-2 block">
+                                {n.createdAt ? new Date(n.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                     <div className="p-3 border-t border-ui-border bg-gray-50 text-center">
-                      <button className="text-[12px] font-medium text-primary hover:text-primary-hover transition-colors">Mark all as read</button>
+                      <button onClick={markAllRead} className="text-[12px] font-medium text-primary hover:text-primary-hover transition-colors">Mark all as read</button>
                     </div>
                   </motion.div>
                 )}

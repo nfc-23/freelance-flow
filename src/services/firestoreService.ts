@@ -189,6 +189,25 @@ export const firestoreService = {
         username,
         createdAt: serverTimestamp(),
       });
+      
+      const projectRef = doc(db, 'projects', projectId);
+      const projectSnap = await getDoc(projectRef);
+      // Ensure we don't notify ourselves if we are the one commenting from inside the dashboard
+      const currentUserId = auth.currentUser?.uid;
+      const ownerId = projectSnap.exists() ? projectSnap.data().userId : null;
+      
+      if (ownerId && ownerId !== currentUserId) {
+        await addDoc(collection(db, 'notifications'), {
+          userId: ownerId,
+          title: 'New Comment',
+          message: `${username} commented on ${projectSnap.data().title || 'a project'}`,
+          read: false,
+          type: 'message',
+          createdAt: serverTimestamp(),
+          link: projectId 
+        });
+      }
+
       return true;
     } catch (error) {
       console.error(error);
