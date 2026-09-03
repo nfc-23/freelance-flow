@@ -1,6 +1,6 @@
 {
   "name": "Freelance Flow",
-  "description": "A comprehensive project management and business tracking application for freelancers, featuring project/task tracking, client management, invoicing, expense tracking, and real-time dashboard analytics.",
+  "description": "Freelance Flow is a comprehensive business management suite engineered by Umaer Islam (umaerislam.com) for independent contractors and freelancers, featuring project velocity tracking, client CRM, automated invoicing, and real-time financial telemetry.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

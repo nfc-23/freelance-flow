@@ -277,6 +277,20 @@ export default function App() {
               )}
             </motion.div>
           </AnimatePresence>
+
+          {/* Workspace Footer & Developer Attribution */}
+          <footer className="mt-16 pt-6 border-t border-ui-border flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-txt-secondary">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-txt-primary">Freelance Flow</span>
+              <span>•</span>
+              <span>Architected &amp; Engineered by <a href="https://umaerislam.com" target="_blank" rel="author external noopener noreferrer" className="font-semibold text-primary hover:underline">Umaer Islam</a></span>
+            </div>
+            <div className="flex items-center gap-3">
+              <a href="https://umaerislam.com" target="_blank" rel="author external noopener noreferrer" className="hover:text-primary transition-colors">umaerislam.com</a>
+              <span>•</span>
+              <span>© {new Date().getFullYear()}</span>
+            </div>
+          </footer>
         </div>
       </main>
     </div>

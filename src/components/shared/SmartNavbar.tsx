@@ -531,6 +531,19 @@ export function SmartNavbar({
                           ?
                         </kbd>
                       </button>
+
+                      <a
+                        href="https://umaerislam.com"
+                        target="_blank"
+                        rel="author external noopener noreferrer"
+                        className="w-full text-left px-4 py-2 text-sm text-txt-primary hover:bg-black/5 flex items-center justify-between transition-colors group"
+                      >
+                        <span className="flex items-center gap-2.5">
+                          <ExternalLink className="w-4 h-4 text-primary group-hover:translate-x-0.5 transition-transform" />
+                          <span className="text-xs">Developer: <strong>Umaer Islam</strong></span>
+                        </span>
+                        <span className="text-[10px] font-mono text-primary font-medium">umaerislam.com</span>
+                      </a>
                     </div>
 
                     <div className="border-t border-ui-border pt-1">
@@ -740,6 +753,20 @@ export function SmartNavbar({
                     <p className="text-xs text-txt-secondary truncate">{user.email}</p>
                   </div>
                 </div>
+
+                <a
+                  href="https://umaerislam.com"
+                  target="_blank"
+                  rel="author external noopener noreferrer"
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs text-txt-secondary hover:text-txt-primary bg-surface border border-ui-border mb-2.5 transition-colors"
+                >
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <Code2 className="w-3.5 h-3.5 text-primary" />
+                    <span>Dev: <strong>Umaer Islam</strong></span>
+                  </span>
+                  <span className="text-[10px] text-primary font-mono">umaerislam.com</span>
+                </a>
+
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

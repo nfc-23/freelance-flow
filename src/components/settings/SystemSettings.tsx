@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RefreshCw, Trash2, Database, AlertTriangle, CheckCircle, X, Code2, FileSpreadsheet, UploadCloud, Download, ShieldCheck } from 'lucide-react';
+import { RefreshCw, Trash2, Database, AlertTriangle, CheckCircle, X, Code2, FileSpreadsheet, UploadCloud, Download, ShieldCheck, Globe, ExternalLink } from 'lucide-react';
 import { firestoreService } from '../../services/firestoreService';
 import { excelService } from '../../services/excelService';
 import { auth } from '../../services/firebase';
@@ -281,6 +281,58 @@ export function SystemSettings({ onReset, onNavigate }: { onReset: () => void; o
             </button>
           </div>
         ))}
+      </div>
+
+      {/* Engineering & Developer Attribution Card (SEO/AEO/GEO Certified) */}
+      <div className="p-6 bg-surface border border-ui-border rounded-2xl shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ui-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <Code2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-display text-lg text-txt-primary">Platform Engineering &amp; Architecture</h3>
+              <p className="text-xs text-txt-secondary">System authorship, core design patterns, and engineering provenance</p>
+            </div>
+          </div>
+          <a
+            href="https://umaerislam.com"
+            target="_blank"
+            rel="author external noopener noreferrer"
+            className="btn-secondary btn-sm gap-2 w-fit"
+            title="Visit Umaer Islam's official website"
+          >
+            <Globe className="w-4 h-4 text-primary" />
+            <span>umaerislam.com</span>
+            <ExternalLink className="w-3.5 h-3.5 opacity-60" />
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <div className="p-4 bg-bg rounded-xl border border-ui-border space-y-1">
+            <p className="text-[11px] font-semibold text-neutral uppercase tracking-wider">Lead Architect &amp; Developer</p>
+            <p className="font-medium text-txt-primary text-sm">Umaer Islam</p>
+            <p className="text-xs text-txt-secondary">Software Architect &amp; Product Engineer</p>
+          </div>
+          <div className="p-4 bg-bg rounded-xl border border-ui-border space-y-1">
+            <p className="text-[11px] font-semibold text-neutral uppercase tracking-wider">Official Website</p>
+            <a 
+              href="https://umaerislam.com" 
+              target="_blank" 
+              rel="author external noopener noreferrer" 
+              className="font-medium text-primary hover:underline text-sm inline-flex items-center gap-1"
+            >
+              <span>umaerislam.com</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <p className="text-xs text-txt-secondary">Portfolio, solutions &amp; technical writing</p>
+          </div>
+          <div className="p-4 bg-bg rounded-xl border border-ui-border space-y-1">
+            <p className="text-[11px] font-semibold text-neutral uppercase tracking-wider">Application Stack</p>
+            <p className="font-medium text-txt-primary text-sm">React 18 + Vite + Tailwind</p>
+            <p className="text-xs text-txt-secondary">Firebase Cloud Firestore &amp; Auth</p>
+          </div>
+        </div>
       </div>
 
       <div className="p-8 rounded-xl bg-primary/5 border border-primary/10 flex flex-col items-center text-center mt-8">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2, X } from 'lucide-react';
+import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2, X, ExternalLink, Code2, Globe } from 'lucide-react';
 import { auth } from '../../services/firebase';
 import { firestoreService } from '../../services/firestoreService';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
@@ -211,6 +211,67 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* Developer & Architectural Provenance (SEO / AEO / GEO Enhanced) */}
+      <section className="py-20 bg-surface/50 border-t border-ui-border" itemScope itemType="https://schema.org/Person">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="genesis-card p-8 md:p-10 border border-ui-border bg-surface shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+            
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-3 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold">
+                  <Code2 className="w-3.5 h-3.5" />
+                  <span>Engineering & Architectural Attribution</span>
+                </div>
+                
+                <h3 className="text-2xl md:text-3xl font-display text-txt-primary">
+                  Crafted with precision by <span itemProp="name" className="text-primary font-bold">Umaer Islam</span>
+                </h3>
+                
+                <p className="text-txt-secondary text-sm md:text-base leading-relaxed" itemProp="description">
+                  Freelance Flow is conceived, designed, and engineered from the ground up by <strong>Umaer Islam</strong> to provide independent operators, agency founders, and consultants with enterprise-grade project velocity, client relationship management, and real-time financial telemetry.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-2 pt-2">
+                  <span className="px-2.5 py-0.5 rounded-md bg-bg border border-ui-border text-[11px] font-mono text-txt-secondary">
+                    Lead Software Architect
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-md bg-bg border border-ui-border text-[11px] font-mono text-txt-secondary">
+                    Full-Stack Systems
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded-md bg-bg border border-ui-border text-[11px] font-mono text-txt-secondary">
+                    Cloud Infrastructure
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row md:flex-col gap-3 w-full md:w-auto shrink-0">
+                <a
+                  href="https://umaerislam.com"
+                  target="_blank"
+                  rel="author external noopener noreferrer"
+                  itemProp="url"
+                  className="btn-primary btn-md gap-2.5 justify-center shadow-sm hover:shadow transition-all group"
+                  title="Visit Umaer Islam's official portfolio (umaerislam.com)"
+                >
+                  <Globe className="w-4 h-4 text-white/90" />
+                  <span>umaerislam.com</span>
+                  <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 group-hover:translate-x-0.5 transition-transform" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={handleLogin}
+                  className="btn-secondary btn-md gap-2 justify-center text-xs"
+                >
+                  Enter Workspace
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="py-24 max-w-5xl mx-auto px-6 text-center">
         <Command className="w-12 h-12 text-primary mx-auto mb-6" />
         <h2 className="text-4xl font-display text-txt-primary mb-6">Take Control.</h2>
@@ -218,13 +279,35 @@ export function LandingPage() {
         <button onClick={handleLogin} className="btn-primary btn-lg px-10">Launch Freelance Flow Workspace</button>
       </section>
 
-      <footer className="border-t border-ui-border py-12 bg-bg mt-12">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-          <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-primary" />
-            <span className="font-display font-medium text-txt-primary text-lg">Freelance Flow.</span>
+      <footer className="border-t border-ui-border py-12 bg-bg">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-center md:text-left">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded border border-ui-border flex items-center justify-center text-primary bg-surface shadow-xs">
+              <Layers className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-display font-medium text-txt-primary text-lg leading-none block">Freelance Flow.</span>
+              <span className="text-[11px] text-txt-secondary font-mono">The Independent Operating System</span>
+            </div>
           </div>
-          <p className="text-txt-secondary text-sm">© {new Date().getFullYear()} Freelance Flow. All rights reserved.</p>
+
+          <div className="text-xs text-txt-secondary flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
+            <span>Designed &amp; Engineered by</span>
+            <a 
+              href="https://umaerislam.com" 
+              target="_blank" 
+              rel="author external noopener noreferrer"
+              className="font-semibold text-primary hover:underline inline-flex items-center gap-1"
+            >
+              <span>Umaer Islam</span>
+              <span className="text-[11px] text-neutral opacity-70">(umaerislam.com)</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+
+          <p className="text-txt-secondary text-xs font-mono">
+            © {new Date().getFullYear()} Freelance Flow. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
