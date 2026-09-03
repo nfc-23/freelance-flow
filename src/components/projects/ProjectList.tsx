@@ -1,13 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Briefcase, Plus, ExternalLink, ArrowRight, ChevronRight, X, MoreHorizontal, Sparkles, RefreshCcw, HandCoins, Activity, Box } from 'lucide-react';
+import { 
+  Briefcase, Plus, ExternalLink, ArrowRight, ChevronRight, X, 
+  MoreHorizontal, Sparkles, RefreshCcw, HandCoins, Activity, Box,
+  Search, Copy, CheckCircle2, Clock
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { suggestTasks } from '../../services/aiService';
 import { firestoreService } from '../../services/firestoreService';
 import { formatCurrency, cn } from '../../lib/utils';
 import { collection, query, getDocs, where, serverTimestamp, doc, updateDoc } from 'firebase/firestore';
 import { db, auth } from '../../services/firebase';
 
-export function ProjectList() {
+interface ProjectListProps {
+  triggerCreate?: number;
+  selectedProjectId?: string | null;
+}
+
+export function ProjectList({ triggerCreate, selectedProjectId }: ProjectListProps = {}) {
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<any>(null);
@@ -23,11 +33,25 @@ export function ProjectList() {
   const [selectedClient, setSelectedClient] = useState('');
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     loadProjects();
     loadClients();
   }, []);
+
+  useEffect(() => {
+    if (triggerCreate && triggerCreate > 0) {
+      openAddModal();
+    }
+  }, [triggerCreate]);
+
+  useEffect(() => {
+    if (selectedProjectId && projects.length > 0) {
+      const match = projects.find(p => p.id === selectedProjectId);
+      if (match) setSelectedProject(match);
+    }
+  }, [selectedProjectId, projects]);
 
   const loadClients = async () => {
     const data = await firestoreService.list('clients');
@@ -132,8 +156,13 @@ export function ProjectList() {
   };
 
   const filteredProjects = projects.filter(p => {
-    if (filter === 'active') return ['planned', 'started'].includes(p.status);
-    if (filter === 'completed') return p.status === 'finished';
+    if (filter === 'active' && !['planned', 'started'].includes(p.status)) return false;
+    if (filter === 'completed' && p.status !== 'finished') return false;
+    if (searchTerm) {
+      const q = searchTerm.toLowerCase();
+      const clientName = clients.find(c => c.id === p.clientId)?.name?.toLowerCase() || '';
+      return p.title.toLowerCase().includes(q) || clientName.includes(q) || (p.status && p.status.toLowerCase().includes(q));
+    }
     return true;
   });
 
@@ -142,22 +171,32 @@ export function ProjectList() {
   }
 
   return (
-    <div className="space-y-12 max-w-7xl mx-auto pb-10 mt-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-4">
-        <div className="space-y-2">
+    <div className="space-y-8 max-w-7xl mx-auto pb-10 mt-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-2">
+        <div className="space-y-1">
           <h1 className="text-3xl font-display text-txt-primary">Pipeline</h1>
           <p className="text-txt-secondary text-sm font-medium">Manage and monitor all ongoing and past initiatives.</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto items-center">
-          <div className="flex p-1 bg-surface border border-ui-border rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 text-txt-secondary absolute left-3 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search projects..."
+              className="w-full pl-9 pr-4 py-2 bg-surface border border-ui-border rounded-lg text-sm text-txt-primary focus:outline-none focus:border-primary transition-colors shadow-xs"
+            />
+          </div>
+          <div className="flex p-1 bg-surface border border-ui-border rounded-lg shadow-xs">
             {['all', 'active', 'completed'].map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
-                  "px-4 py-2 font-medium text-sm capitalize rounded-md transition-all",
+                  "px-3.5 py-1.5 font-medium text-xs capitalize rounded-md transition-all",
                   filter === f 
-                    ? "bg-bg text-txt-primary shadow-sm border border-ui-border" 
+                    ? "bg-bg text-txt-primary shadow-xs border border-ui-border" 
                     : "text-txt-secondary hover:text-txt-primary"
                 )}
               >
@@ -165,7 +204,7 @@ export function ProjectList() {
               </button>
             ))}
           </div>
-          <button onClick={openAddModal} className="btn-primary btn-md gap-2 w-full sm:w-auto">
+          <button onClick={openAddModal} className="btn-primary btn-md gap-2 w-full sm:w-auto shadow-xs">
              <Plus className="w-4 h-4" /> Initialize
           </button>
         </div>
@@ -278,9 +317,22 @@ export function ProjectList() {
               onClick={() => setSelectedProject(project)}
               className="genesis-card p-6 flex flex-col group cursor-pointer hover:-translate-y-[2px]"
             >
-              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
-                <button onClick={(e) => openEditModal(e, project)} className="p-1.5 bg-surface text-txt-secondary hover:text-primary rounded-md border border-ui-border shadow-sm"><MoreHorizontal className="w-4 h-4" /></button>
-                <button onClick={(e) => handleDeleteProject(e, project.id)} className="p-1.5 bg-surface text-txt-secondary hover:text-error hover:bg-error/5 rounded-md border border-ui-border shadow-sm"><X className="w-4 h-4" /></button>
+              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1.5 z-10">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('portal', project.id);
+                    navigator.clipboard.writeText(url.toString());
+                    toast.success('Client portal link copied!');
+                  }}
+                  className="p-1.5 bg-surface text-txt-secondary hover:text-primary rounded-md border border-ui-border shadow-xs"
+                  title="Copy Client Portal Link"
+                >
+                  <Copy className="w-4 h-4" />
+                </button>
+                <button onClick={(e) => openEditModal(e, project)} className="p-1.5 bg-surface text-txt-secondary hover:text-primary rounded-md border border-ui-border shadow-xs" title="Edit"><MoreHorizontal className="w-4 h-4" /></button>
+                <button onClick={(e) => handleDeleteProject(e, project.id)} className="p-1.5 bg-surface text-txt-secondary hover:text-error hover:bg-error/5 rounded-md border border-ui-border shadow-xs" title="Delete"><X className="w-4 h-4" /></button>
               </div>
 
               <div className="flex flex-col mb-6 mt-1 flex-1">
@@ -463,16 +515,29 @@ function ProjectDetails({ project, onBack, clients }: { project: any, onBack: ()
         <button onClick={onBack} className="text-sm font-medium text-txt-secondary hover:text-primary transition-colors flex items-center gap-1.5 px-3 py-1.5 -ml-3 hover:bg-black/5 rounded-md">
           <ChevronRight className="w-4 h-4 rotate-180" /> Back to Pipeline
         </button>
-        <button 
-          onClick={() => {
-            const url = new URL(window.location.href);
-            url.searchParams.set('portal', project.id);
-            window.open(url.toString(), '_blank');
-          }}
-          className="btn-secondary btn-md gap-2"
-        >
-          <ExternalLink className="w-4 h-4" /> Client Portal
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set('portal', project.id);
+              navigator.clipboard.writeText(url.toString());
+              toast.success('Client portal link copied to clipboard!');
+            }}
+            className="btn-secondary btn-md gap-2"
+          >
+            <Copy className="w-4 h-4" /> Copy Portal Link
+          </button>
+          <button 
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set('portal', project.id);
+              window.open(url.toString(), '_blank');
+            }}
+            className="btn-primary btn-md gap-2"
+          >
+            <ExternalLink className="w-4 h-4" /> Open Portal
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">

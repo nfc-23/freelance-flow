@@ -31,7 +31,10 @@ export function PublicInvoiceView({ invoiceId }: { invoiceId: string }) {
     }
   };
 
-  useEffect(() => { loadInvoice(); }, [invoiceId]);
+  useEffect(() => { 
+    loadInvoice(); 
+    firestoreService.recordVisitor(`/?invoice=${invoiceId}`, 'public_invoice_view');
+  }, [invoiceId]);
 
   const handleDownloadPDF = async () => {
     if (!invoiceRef.current || downloading) return;

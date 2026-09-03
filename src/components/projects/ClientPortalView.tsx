@@ -11,7 +11,10 @@ export function ClientPortalView({ projectId }: { projectId: string }) {
   const [commentName, setCommentName] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
 
-  useEffect(() => { loadPortalData(); }, [projectId]);
+  useEffect(() => { 
+    loadPortalData(); 
+    firestoreService.recordVisitor(`/?portal=${projectId}`, 'client_portal_view');
+  }, [projectId]);
 
   const loadPortalData = async () => {
     try {

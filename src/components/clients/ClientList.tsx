@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, MoreHorizontal, UserPlus, Search, Plus, Box, X } from 'lucide-react';
+import { Mail, Phone, MapPin, MoreHorizontal, UserPlus, Search, Plus, Box, X, Copy } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { firestoreService } from '../../services/firestoreService';
 import type { Client } from '../../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 
-export function ClientList() {
+interface ClientListProps {
+  triggerCreate?: number;
+}
+
+export function ClientList({ triggerCreate }: ClientListProps = {}) {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -21,6 +26,12 @@ export function ClientList() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { loadClients(); }, []);
+
+  useEffect(() => {
+    if (triggerCreate && triggerCreate > 0) {
+      openAddModal();
+    }
+  }, [triggerCreate]);
 
   const loadClients = async () => {
     setLoading(true);
@@ -204,9 +215,22 @@ export function ClientList() {
                 </div>
                 
                 <div className="space-y-3 pt-4 border-t border-ui-border mt-auto">
-                  <div className="flex items-center space-x-3 text-sm text-txt-primary">
-                    <Mail className="w-4 h-4 text-txt-secondary shrink-0" />
-                    <span className="truncate">{client.email}</span>
+                  <div className="flex items-center justify-between text-sm text-txt-primary">
+                    <div className="flex items-center space-x-3 min-w-0 pr-2">
+                      <Mail className="w-4 h-4 text-txt-secondary shrink-0" />
+                      <span className="truncate">{client.email}</span>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(client.email);
+                        toast.success('Email copied to clipboard!');
+                      }}
+                      className="p-1 text-txt-secondary hover:text-primary rounded"
+                      title="Copy Email"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                   {client.phone && (
                    <div className="flex items-center space-x-3 text-sm text-txt-primary">

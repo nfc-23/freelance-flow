@@ -108,9 +108,68 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["projectId", "text", "username"]
+    },
+    "User": {
+      "title": "User",
+      "description": "User profile with role, email, and activity stats.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["freelancer", "developer", "admin"] },
+        "lastLoginAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role"]
+    },
+    "VisitorLog": {
+      "title": "Visitor Log",
+      "description": "Analytics tracking visits, page views, and client interactions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "visitorId": { "type": "string" },
+        "path": { "type": "string" },
+        "device": { "type": "string" },
+        "browser": { "type": "string" },
+        "action": { "type": "string" },
+        "userId": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["visitorId", "path", "createdAt"]
+    },
+    "AuthorizedDeveloper": {
+      "title": "Authorized Developer",
+      "description": "Authorized developers granted administrative and superuser console access.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["owner", "admin", "analyst"] },
+        "addedBy": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" },
+        "notes": { "type": "string" }
+      },
+      "required": ["email", "role", "addedAt"]
     }
   },
   "firestore": {
+    "authorized_developers": {
+      "schema": "AuthorizedDeveloper",
+      "description": "Whitelisted developer email addresses with administrative access."
+    },
+    "users": {
+      "schema": "User",
+      "description": "Registered user profiles and developer roles."
+    },
+    "visitor_logs": {
+      "schema": "VisitorLog",
+      "description": "Visitor logs and traffic analytics."
+    },
     "clients": {
       "schema": "Client",
       "description": "List of business clients."

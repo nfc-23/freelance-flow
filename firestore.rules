@@ -12,12 +12,20 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isDeveloper() {
+      return isSignedIn() && (
+        request.auth.token.email == 'mdomaerislam@gmail.com' ||
+        (request.auth.token.email != null && request.auth.token.email.matches('.*@developer\\.local$')) ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/authorized_developers/$(request.auth.token.email)))
+      );
+    }
+
     function isOwner(data) {
-      return isSignedIn() && data.userId == request.auth.uid;
+      return isSignedIn() && (data.userId == request.auth.uid || isDeveloper());
     }
 
     function isOwnerFromResource() {
-      return isSignedIn() && resource.data.userId == request.auth.uid;
+      return isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
     }
 
     function isValidId(id) {
@@ -34,16 +42,36 @@ service cloud.firestore {
 
     // --- Collections ---
 
+    // Authorized Developers Whitelist & Access Management
+    match /authorized_developers/{devEmail} {
+      allow read: if isSignedIn();
+      allow write: if isDeveloper();
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isDeveloper());
+      allow create, update: if isSignedIn() && (request.auth.uid == userId || isDeveloper());
+      allow delete: if isDeveloper();
+    }
+
+    // Visitor Logs
+    match /visitor_logs/{logId} {
+      allow create: if true; // Track any visitor/portal hit
+      allow read: if isDeveloper();
+      allow delete: if isDeveloper();
+    }
+
     // Clients
     match /clients/{clientId} {
       function isValidClient(data) {
-        return data.userId == request.auth.uid &&
+        return (data.userId == request.auth.uid || isDeveloper()) &&
                data.name is string && data.name.size() > 0 && data.name.size() < 256 &&
                data.email is string && data.email.size() > 0;
       }
       
       allow get: if true; // Public access for portal/invoices
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
       allow create: if isSignedIn() && isValidClient(incoming());
       allow update: if isOwner(existing()) && isValidClient(incoming());
       allow delete: if isOwner(existing());
@@ -52,12 +80,12 @@ service cloud.firestore {
     // Projects
     match /projects/{projectId} {
       function isValidProject(data) {
-        return data.userId == request.auth.uid &&
+        return (data.userId == request.auth.uid || isDeveloper()) &&
                data.title is string && data.title.size() > 0;
       }
 
       allow get: if true; // Public portal access
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
       allow create: if isSignedIn() && isValidProject(incoming());
       allow update: if isOwner(existing()) && isValidProject(incoming());
       allow delete: if isOwner(existing());
@@ -66,13 +94,13 @@ service cloud.firestore {
     // Tasks
     match /tasks/{taskId} {
       function isValidTask(data) {
-        return data.userId == request.auth.uid &&
+        return (data.userId == request.auth.uid || isDeveloper()) &&
                data.projectId is string &&
                data.title is string && data.title.size() > 0;
       }
 
       allow get: if true; // Public portal access
-      allow list: if (isSignedIn() && resource.data.userId == request.auth.uid) || (resource.data.projectId != null);
+      allow list: if (isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper())) || (resource.data.projectId != null);
       allow create: if isSignedIn() && isValidTask(incoming());
       allow update: if isOwner(existing()) && isValidTask(incoming());
       allow delete: if isOwner(existing());
@@ -81,13 +109,13 @@ service cloud.firestore {
     // Invoices
     match /invoices/{invoiceId} {
       function isValidInvoice(data) {
-        return data.userId == request.auth.uid &&
+        return (data.userId == request.auth.uid || isDeveloper()) &&
                data.invoiceNumber is string &&
                data.amount is number;
       }
 
       allow get: if true; // Public access
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
       allow create: if isSignedIn() && isValidInvoice(incoming());
       allow update: if isOwner(existing()) && isValidInvoice(incoming());
       allow delete: if isOwner(existing());
@@ -96,13 +124,13 @@ service cloud.firestore {
     // Expenses
     match /expenses/{expenseId} {
       function isValidExpense(data) {
-        return data.userId == request.auth.uid &&
+        return (data.userId == request.auth.uid || isDeveloper()) &&
                data.amount is number && data.amount > 0 &&
                data.description is string && data.description.size() > 0;
       }
 
       allow get: if isOwner(existing());
-      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow list: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
       allow create: if isSignedIn() && isValidExpense(incoming());
       allow update: if isOwner(existing()) && isValidExpense(incoming());
       allow delete: if isOwner(existing());
@@ -110,10 +138,10 @@ service cloud.firestore {
 
     // Notifications
     match /notifications/{notificationId} {
-      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
       allow create: if true; // Allow unauthenticated portal clients to create notifications
-      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
+      allow delete: if isSignedIn() && (resource.data.userId == request.auth.uid || isDeveloper());
     }
 
     // Project Comments

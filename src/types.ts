@@ -73,3 +73,72 @@ export interface Expense {
   date: string;
   createdAt: string;
 }
+
+export interface UserAccount {
+  id: string; // uid
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  role: 'freelancer' | 'developer' | 'admin';
+  createdAt: string;
+  lastLoginAt: string;
+  totalProjects?: number;
+  totalInvoices?: number;
+  totalClients?: number;
+  totalRevenue?: number;
+}
+
+export interface VisitorLogEntry {
+  id: string;
+  visitorId: string;
+  path: string;
+  device: string;
+  browser: string;
+  action: string;
+  userId?: string;
+  userEmail?: string;
+  createdAt: string;
+}
+
+export interface AccountFullData {
+  account: {
+    uid: string;
+    email: string;
+    displayName?: string;
+    role?: string;
+    exportedAt: string;
+  };
+  projects: Project[];
+  tasks: Task[];
+  invoices: Invoice[];
+  clients: Client[];
+  expenses: Expense[];
+}
+
+export interface AuthorizedDeveloper {
+  id: string; // email lowercase
+  email: string;
+  displayName?: string;
+  role: 'owner' | 'admin' | 'analyst';
+  addedBy: string;
+  addedAt: string;
+  notes?: string;
+}
+
+export interface SystemHealthMetrics {
+  databaseStatus: 'operational' | 'degraded' | 'offline';
+  latencyMs: number;
+  collectionsBreakdown: {
+    users: number;
+    projects: number;
+    invoices: number;
+    clients: number;
+    tasks: number;
+    expenses: number;
+    visitorLogs: number;
+  };
+  todayVisitors: number;
+  activeTodayUsers: number;
+  totalRevenuePaid: number;
+  totalRevenuePending: number;
+}

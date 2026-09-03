@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { 
-  CheckCircle2, Briefcase, Zap, Activity, Database, Layers, Target, 
+  CheckCircle2, Briefcase, Zap, Activity, Layers, Target, 
   Sparkles, Cpu, Clock, ListTodo, Wallet, LayoutDashboard
 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -32,7 +32,11 @@ const defaultTrendData = [
   { name: 'Jun', income: 7200, expenses: 3100 }
 ];
 
-export function Dashboard() {
+interface DashboardProps {
+  onNavigate?: (view: 'dashboard' | 'projects' | 'invoices' | 'clients' | 'settings', targetId?: string) => void;
+}
+
+export function Dashboard({ onNavigate }: DashboardProps = {}) {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [aiInsights, setAiInsights] = useState<ProjectInsight[]>([]);
@@ -65,12 +69,6 @@ export function Dashboard() {
     }
   };
 
-  const seedData = async () => {
-    setLoading(true);
-    await firestoreService.seedDemoData();
-    loadStats();
-  };
-
   const dynamicProjectDistribution = stats?.projectDistribution?.length > 0 ? stats.projectDistribution : defaultProjectDistribution;
   const lifecycleData = stats?.statusDistribution ? [
     { name: 'Planned', value: stats.statusDistribution.planned, color: '#8b5cf6' },
@@ -97,17 +95,38 @@ export function Dashboard() {
           <h1 className="text-3xl font-display text-txt-primary">Project Command Center</h1>
           <p className="text-txt-secondary text-[15px]">Welcome back, {user?.displayName?.split(' ')[0] || 'Commander'}. Here is your project landscape.</p>
         </div>
-        <button onClick={seedData} className="btn-secondary btn-md gap-2">
-          <Database className="w-4 h-4" /> Resync Data
-        </button>
       </motion.div>
 
       {/* Primary KPI Grid */}
       <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-         <KpiCard title="Active Projects" value={stats?.activeProjects?.length || 0} icon={<Briefcase />} color="indigo" />
-         <KpiCard title="Tasks Completion" value={`${stats?.statusDistribution?.finished || 0} / ${(stats?.statusDistribution?.started || 0) + (stats?.statusDistribution?.planned || 0) + (stats?.statusDistribution?.finished || 0)}`} icon={<CheckCircle2 />} color="emerald" />
-         <KpiCard title="Overdue Tasks" value={stats?.statusDistribution?.paused || 0} icon={<Clock />} color="rose" />
-         <KpiCard title="Est. Revenue" value={formatCurrency((stats?.profit || 0) + (stats?.pendingPayments || 0))} icon={<Wallet />} color="amber" />
+         <KpiCard 
+           title="Active Projects" 
+           value={stats?.activeProjects?.length || 0} 
+           icon={<Briefcase />} 
+           color="indigo" 
+           onClick={() => onNavigate?.('projects')}
+         />
+         <KpiCard 
+           title="Tasks Completion" 
+           value={`${stats?.completedTasks || 0} / ${stats?.totalTasks || 0}`} 
+           icon={<CheckCircle2 />} 
+           color="emerald" 
+           onClick={() => onNavigate?.('projects')}
+         />
+         <KpiCard 
+           title="Overdue Projects" 
+           value={stats?.statusDistribution?.paused || 0} 
+           icon={<Clock />} 
+           color="rose" 
+           onClick={() => onNavigate?.('projects')}
+         />
+         <KpiCard 
+           title="Total Earnings" 
+           value={formatCurrency((stats?.totalEarned || 0))} 
+           icon={<Wallet />} 
+           color="amber" 
+           onClick={() => onNavigate?.('invoices')}
+         />
       </motion.div>
 
       {/* AI Intelligence Section */}
@@ -290,9 +309,13 @@ export function Dashboard() {
            </div>
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {stats?.activeProjects?.length > 0 ? (
-                 stats.activeProjects.slice(0, 3).map((p: any) => (
-                   <ProjectWorkloadCard key={p.id} project={p} />
-                 ))
+                stats.activeProjects.slice(0, 3).map((p: any) => (
+                  <ProjectWorkloadCard 
+                    key={p.id} 
+                    project={p} 
+                    onClick={() => onNavigate?.('projects', p.id)}
+                  />
+                ))
               ) : (
                  <div className="col-span-full py-16 text-center border border-dashed border-ui-border rounded-xl bg-bg">
                     <ListTodo className="w-8 h-8 text-neutral mx-auto mb-3" />
@@ -306,7 +329,7 @@ export function Dashboard() {
   );
 }
 
-function KpiCard({ title, value, icon, color }: any) {
+function KpiCard({ title, value, icon, color, onClick }: any) {
   const iconColors: Record<string, string> = {
     emerald: "text-success bg-success/10",
     indigo: "text-primary bg-primary/10",
@@ -315,7 +338,13 @@ function KpiCard({ title, value, icon, color }: any) {
   };
 
   return (
-    <div className="genesis-card p-6 flex flex-col cursor-default">
+    <div 
+      onClick={onClick}
+      className={cn(
+        "genesis-card p-6 flex flex-col transition-all",
+        onClick ? "cursor-pointer hover:-translate-y-1 hover:border-primary/40 hover:shadow-md" : "cursor-default"
+      )}
+    >
       <div className="flex justify-between items-start mb-4">
          <div className={cn("w-10 h-10 rounded-md flex items-center justify-center", iconColors[color])}>
            {icon}
@@ -329,32 +358,44 @@ function KpiCard({ title, value, icon, color }: any) {
   );
 }
 
-function ProjectWorkloadCard({ project }: any) {
-  const progress = Math.floor(Math.random() * 60) + 20; // Simulated
+function ProjectWorkloadCard({ project, onClick }: any) {
+  const progress = project.status === 'finished' ? 100 
+    : project.status === 'started' ? 65 
+    : project.status === 'paused' ? 45 
+    : 25;
   
   return (
-    <div className="genesis-card p-5 cursor-pointer">
+    <div 
+      onClick={onClick}
+      className="genesis-card p-5 cursor-pointer hover:-translate-y-1 hover:border-primary/40 transition-all hover:shadow-md group"
+    >
       <div className="flex items-center justify-between mb-4">
-         <div className="p-2 bg-bg border border-ui-border rounded-md text-txt-secondary">
+         <div className="p-2 bg-bg border border-ui-border rounded-md text-txt-secondary group-hover:text-primary transition-colors">
            <Layers className="w-4 h-4" />
          </div>
          <span className="chip-default bg-primary/10 text-primary uppercase font-medium">
-            {project.status}
+            {project.status || 'Active'}
          </span>
       </div>
       
-      <h4 className="text-lg font-medium text-txt-primary truncate mb-1">{project.title}</h4>
+      <h4 className="text-lg font-medium text-txt-primary truncate mb-1 group-hover:text-primary transition-colors">{project.title}</h4>
       <p className="text-sm text-txt-secondary mb-6 flex items-center gap-1.5">
          Budget: {formatCurrency(project.budget || 0)}
       </p>
       
       <div className="space-y-2">
          <div className="flex justify-between items-center text-xs text-txt-secondary">
-            <span>Phase Progress</span>
+            <span>Progress</span>
             <span className="font-medium text-txt-primary">{progress}%</span>
          </div>
          <div className="h-2 w-full bg-bg rounded-full overflow-hidden border border-ui-border">
-            <div className="h-full bg-primary" style={{ width: `${progress}%` }} />
+            <div 
+              className={cn(
+                "h-full transition-all duration-500",
+                progress === 100 ? "bg-success" : "bg-primary"
+              )} 
+              style={{ width: `${progress}%` }} 
+            />
          </div>
       </div>
     </div>

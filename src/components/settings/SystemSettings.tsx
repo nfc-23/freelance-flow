@@ -1,14 +1,30 @@
 import { useState } from 'react';
-import { RefreshCw, Trash2, Database, AlertTriangle, CheckCircle, X } from 'lucide-react';
+import { RefreshCw, Trash2, Database, AlertTriangle, CheckCircle, X, Code2, FileSpreadsheet, UploadCloud, Download, ShieldCheck } from 'lucide-react';
 import { firestoreService } from '../../services/firestoreService';
+import { excelService } from '../../services/excelService';
+import { auth } from '../../services/firebase';
 import { cn } from '../../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
+import toast from 'react-hot-toast';
 
-export function SystemSettings({ onReset }: { onReset: () => void }) {
+export function SystemSettings({ onReset, onNavigate }: { onReset: () => void; onNavigate?: (view: string) => void }) {
   const [loading, setLoading] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [confirmingAction, setConfirmingAction] = useState<string | null>(null);
   const [confirmInput, setConfirmInput] = useState('');
+
+  const handleExportMyAccount = async () => {
+    try {
+      const user = (await import('../../services/firebase')).auth.currentUser;
+      if (!user) return toast.error('No logged in user');
+      const loadToast = toast.loading('Compiling Excel workbook...');
+      const fullData = await firestoreService.exportAccountData(user.uid);
+      excelService.exportAccountToExcel(fullData);
+      toast.success('Account exported as .xlsx workbook!', { id: loadToast });
+    } catch (err: any) {
+      toast.error('Export failed: ' + err.message);
+    }
+  };
 
   const handleReset = async (type: string) => {
     setLoading(type);
@@ -54,8 +70,105 @@ export function SystemSettings({ onReset }: { onReset: () => void }) {
     { id: 'tasks', title: 'Clear Tasks', desc: 'Remove todo lists and completed task histories.', icon: <Database />, color: 'amber' }
   ];
 
+  const isDev = firestoreService.isDeveloper(auth.currentUser);
+
   return (
     <div className="max-w-4xl space-y-8 mt-4 pb-10">
+      {/* Developer & Telemetry Card (Only visible to Authorized Developers) */}
+      {isDev ? (
+        <div className="p-6 bg-surface border border-ui-border rounded-2xl shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ui-border">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center">
+                <Code2 className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-bold text-txt-primary">Developer Console & Telemetry</h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary text-white uppercase">
+                    Superuser
+                  </span>
+                </div>
+                <p className="text-xs text-txt-secondary mt-0.5">
+                  Inspect visitors, user accounts, and all database records. Export and import entire account workbooks.
+                </p>
+              </div>
+            </div>
+
+            {onNavigate && (
+              <button
+                onClick={() => onNavigate('developer')}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-white shadow-sm transition-all shrink-0"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Open Developer Console
+              </button>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="p-3.5 bg-bg border border-ui-border rounded-xl flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-txt-primary">Export Account (.xlsx)</p>
+                <p className="text-[11px] text-txt-secondary">Download all your projects, tasks, invoices, and clients as an Excel spreadsheet.</p>
+              </div>
+              <button
+                onClick={handleExportMyAccount}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-all shrink-0 shadow-xs"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export
+              </button>
+            </div>
+
+            <div className="p-3.5 bg-bg border border-ui-border rounded-xl flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-txt-primary">Account Migrator</p>
+                <p className="text-[11px] text-txt-secondary">Import an Excel or JSON account backup from another user or file.</p>
+              </div>
+              {onNavigate ? (
+                <button
+                  onClick={() => onNavigate('developer')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-surface border border-ui-border text-txt-primary hover:bg-black/5 transition-all shrink-0 shadow-xs"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 text-primary" />
+                  Import
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Regular User Data Portability */
+        <div className="p-6 bg-surface border border-ui-border rounded-2xl shadow-sm space-y-4">
+          <div className="flex items-center gap-3 pb-3 border-b border-ui-border">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center">
+              <FileSpreadsheet className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-txt-primary">Data Backup & Portability</h2>
+              <p className="text-xs text-txt-secondary mt-0.5">
+                Download a clean, structured backup copy of your account data anytime.
+              </p>
+            </div>
+          </div>
+
+          <div className="p-3.5 bg-bg border border-ui-border rounded-xl flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-txt-primary">Export My Data (.xlsx)</p>
+              <p className="text-[11px] text-txt-secondary">Download an Excel workbook with your projects, tasks, invoices, and clients.</p>
+            </div>
+            <button
+              onClick={handleExportMyAccount}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-all shrink-0 shadow-xs"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export .xlsx
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-display text-txt-primary flex items-center gap-3">

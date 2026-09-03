@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Search, ExternalLink, ArrowRight, X, Edit3, Banknote, ReceiptText, AlertTriangle, FileText, CheckCircle2, MoreHorizontal, FileClock, CheckCircle, Wallet } from 'lucide-react';
+import { Plus, Search, ExternalLink, ArrowRight, X, Edit3, Banknote, ReceiptText, AlertTriangle, FileText, CheckCircle2, MoreHorizontal, FileClock, CheckCircle, Wallet, Copy } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import { firestoreService } from '../../services/firestoreService';
 import { formatCurrency, cn } from '../../lib/utils';
 import { collection, query, getDocs, where } from 'firebase/firestore';
 import { db, auth } from '../../services/firebase';
 import { InvoiceEditor } from './InvoiceEditor';
 
-export function InvoiceList() {
+interface InvoiceListProps {
+  triggerCreate?: number;
+}
+
+export function InvoiceList({ triggerCreate }: InvoiceListProps = {}) {
   const [invoices, setInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,6 +31,12 @@ export function InvoiceList() {
     loadProjects();
     loadClients();
   }, []);
+
+  useEffect(() => {
+    if (triggerCreate && triggerCreate > 0) {
+      setIsModalOpen(true);
+    }
+  }, [triggerCreate]);
 
   const loadInvoices = async () => {
     setLoading(true);
@@ -108,7 +119,10 @@ export function InvoiceList() {
     try {
       setUpdatingId(id);
       await firestoreService.update('invoices', id, { status });
+      toast.success(`Invoice marked as ${status}`);
       await loadInvoices();
+    } catch (err) {
+      toast.error('Failed to update invoice status');
     } finally {
       setUpdatingId(null);
     }
@@ -359,6 +373,18 @@ export function InvoiceList() {
                      <p className="font-mono text-xl font-bold text-txt-primary">{formatCurrency(invoice.amount)}</p>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
+                     <button
+                       onClick={() => {
+                         const url = new URL(window.location.href);
+                         url.searchParams.set('invoice', invoice.id);
+                         navigator.clipboard.writeText(url.toString());
+                         toast.success('Public invoice link copied!');
+                       }}
+                       className="p-2 rounded-md bg-surface border border-ui-border text-txt-secondary hover:text-primary transition-colors"
+                       title="Copy Public Link"
+                     >
+                        <Copy className="w-4 h-4" />
+                     </button>
                      {invoice.status !== 'paid' && (
                         <button
                           onClick={() => handleUpdateStatus(invoice.id, 'paid')}

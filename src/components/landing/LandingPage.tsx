@@ -2,11 +2,16 @@ import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Briefcase, ArrowRight, Activity, Cpu, Banknote, Layers, Terminal, Users, LayoutDashboard, Rocket, Command, CheckCircle2, X } from 'lucide-react';
 import { auth } from '../../services/firebase';
+import { firestoreService } from '../../services/firestoreService';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 export function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+
+  useEffect(() => {
+    firestoreService.recordVisitor('/', 'landing_page_view');
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
